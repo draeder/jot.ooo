@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+    <script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.2/build/styles/sunburst.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.2/build/highlight.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb-keyval@3/dist/idb-keyval-iife.min.js"></script>
+</head>
+
+<style>
+html {
+    height: 100%
+}
+body {
+    background-color: #313E50;
+}
+legend {
+    display: block;
+    padding-left: 0.5em !important;
+    font-weight: bold;
+    font-size: 1.5em;
+    border: none;
+    outline: none;
+    background-color:white;
+    color: black;
+}
+header {
+    background-color: #3A435E;
+    min-height: 60px;
+    height: 8em;
+}
+section {
+    display:block;
+    min-height: 2em;
+    color: white;
+}
+input {
+    color: black;
+}
+#search-container {
+    background-color: #313E50;
+}
+#editor .ql-editor {
+    display: block;
+    min-height: 450px;
+    height: auto;
+    background-color:white;
+    color: black;
+}
+.ql-snow .ql-editor pre.ql-syntax {
+    background-color: #383838;
+    overflow: visible;
+}
+.ql-toolbar.ql-snow {
+    background-color:lightgray;
+}
+[contenteditable="true"].single-line {
+    white-space: nowrap;
+    overflow: hidden;
+} 
+[contenteditable="true"].single-line br {
+    display:none;
+
+}
+[contenteditable="true"].single-line * {
+    display:inline;
+    white-space:nowrap;
+}
+</style>
+<body>
+    <!--header>
+
+    </header-->
+    <section id="search-container">
+        <input type="search" placeholder="Search . . . ">
+    </section>
+    <section>
+        <label class="button">New</label>
+        <label>
+            <input type="checkbox">
+            <span class="checkable">Private</span>
+        </label>
+        <label class="button dangerous">Delete</label>
+        <label class="button">Browse</label>
+    </section>
+    <section>
+        <legend id="title" contenteditable="true" class="single-line">Untitled</legend>
+        <div id="editor">
+
+        </div>
+    </section>
+    <!-- Searh results modal -->
+    <div class="modal">
+        <input id="modal_1" type="checkbox" />
+        <label for="modal_1" class="overlay"></label>
+        <article>
+            <header>
+                <h3>Search results for: (your search)</h3>
+                <label for="modal_1" class="close">&times;</label>
+            </header>
+            <section class="content">
+                Results
+            </section>
+            <footer>
+                <label for="modal_1" class="button dangerous" style="background-color: grey">
+                Cancel
+                </label>
+            </footer>
+        </article>
+    </div>
+    <!--hidden button to display search results-->
+    <!--label for="modal_1" class="button" style="visibility: hidden"></label-->
+</body>
+<script type="module">
+// Database
+import { Store, get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@3/dist/idb-keyval.mjs';
+
+const customStore = new Store('jot-db', 'jots');
+
+// Highlight.js
+hljs.configure({   // optionally configure hljs
+  languages: ['javascript', 'ruby', 'python', 'html']
+})
+
+// Quill
+var toolbarOptions = [
+  ['code-block', 'link'],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+  [{ 'align': [] }],
+  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+  [{ 'indent': '-1'}, { 'indent': '+1' }],
+  [{ 'color': [] }, { 'background': [] }],
+  ['clean']
+]
+
+var quill = new Quill('#editor', {
+  modules: {
+    syntax: true,              // Include syntax module
+    toolbar: toolbarOptions  // Include button in toolbar
+  },
+  theme: 'snow'
+})
+
+// Jot.ooo // Main application
+let id = generateId() //Generate new document ID upon load
+let legend = document.getElementById("title")
+
+// Change document name 
+legend.addEventListener('keyup', debounce( () => {
+    documentUpdated()
+},1000))
+
+// Process document changes (Auto-save draft, send updates to colaborators, etc.)
+function documentUpdated(){
+    console.log("Saving draft: ")
+
+    console.log(editor.innerHTML)
+
+    if(legend.textContent == "Untitled"){
+        let name = titleChangeOnce()
+    }
+    let name = legend.textContent
+    let content = editor.innerHTML
+    save(name, content)
+}
+
+function save(name, content){
+    set(id, [{name: name, content: content, private: false, date: createdDate(), modified: Date()}], customStore)
+        .then(() => console.log('It worked!'))
+        .catch(err => console.log('It failed!', err));
+}
+
+// Get a created date
+let createdDate = once(function(){
+    return Date()
+})
+// Name document after first line of entered text
+let titleChangeOnce = once(function(){
+    let name = editor.textContent;
+    legend.textContent = name
+    return name
+})
+
+// Process timed events
+function debounce(callback, wait) {
+  let timeout;
+  return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(function () { callback.apply(this, args) }, wait);
+  };
+}
+
+// Process stopped typing event
+let editor = document.getElementsByClassName("ql-editor")[0]
+editor.addEventListener('keyup', debounce( () => {
+    console.log("user stopped typing")
+    documentUpdated()
+}, 1000))
+
+// Search results modal
+function searchResults(){
+    document.getElementById('modal_1').checked = true
+}
+//searchResults()
+
+// Once function
+function once(fn, context) { 
+	var result;
+
+	return function() { 
+		if(fn) {
+			result = fn.apply(context || this, arguments);
+			fn = null;
+		}
+		return result;
+	};
+}
+
+// Usage
+//var canOnlyFireOnce = once(function() {
+//	console.log('Fired!');
+//});
+
+//canOnlyFireOnce(); // "Fired!"
+//canOnlyFireOnce(); // nada
+
+//generate crypto hash
+function generateId (len) {
+    var arr = new Uint8Array((len || 40) / 2)
+    window.crypto.getRandomValues(arr)
+    return Array.from(arr, dec2hex).join('')
+}
+function dec2hex (dec) {
+    return ('0' + dec.toString(16)).substr(-2)
+}
+</script>
+</html>
