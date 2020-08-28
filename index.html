@@ -17,7 +17,7 @@ html {
     height: 100%
 }
 body {
-    background-color: #313E50;
+    background-color: #0d1b2a;
 }
 legend {
     display: block;
@@ -32,8 +32,7 @@ legend {
 }
 header {
     background-color: #3A435E;
-    min-height: 60px;
-    height: 8em;
+    color: white;
 }
 section {
     display:block;
@@ -45,8 +44,18 @@ input {
     border: none;
     outline: none;
 }
+#nav {
+    background-color: white;
+    color: black;
+    margin: 1em 0;
+    padding: 0.5em;
+}
+#modal_content{
+    color: black;
+}
 #search-container {
     background-color: #313E50;
+    margin: 1em 0;
 }
 #editor .ql-editor {
     display: block;
@@ -56,11 +65,11 @@ input {
     color: black;
 }
 .ql-snow .ql-editor pre.ql-syntax {
-    background-color: #383838;
+    background-color: #0d1b2a;
     overflow: visible;
 }
 .ql-toolbar.ql-snow {
-    background-color:lightgray;
+    background-color:#e0e1dd;
 }
 [contenteditable="true"].single-line {
     white-space: nowrap;
@@ -82,14 +91,14 @@ input {
     <section id="search-container">
         <input type="text" placeholder="Search . . . ">
     </section>
-    <section>
+    <section id="nav">
         <label class="button">New</label>
         <label>
             <input type="checkbox">
             <span class="checkable">Private</span>
         </label>
         <label class="button dangerous">Delete</label>
-        <label class="button">Browse</label>
+        <label class="button" id="browse">Browse</label>
     </section>
     <section>
         <legend id="title" contenteditable="true" class="single-line">Untitled</legend>
@@ -103,11 +112,11 @@ input {
         <label for="modal_1" class="overlay"></label>
         <article>
             <header>
-                <h3>Search results for: (your search)</h3>
+                <h3 id="modal_title"></h3>
                 <label for="modal_1" class="close">&times;</label>
             </header>
-            <section class="content">
-                Results
+            <section class="content" id="modal_content">
+
             </section>
             <footer>
                 <label for="modal_1" class="button dangerous" style="background-color: grey">
@@ -121,7 +130,7 @@ input {
 </body>
 <script type="module">
 // Database
-import { Store, get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@3/dist/idb-keyval.mjs';
+import { Store, keys, get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@3/dist/idb-keyval.mjs';
 
 const customStore = new Store('jot-db', 'jots');
 
@@ -174,9 +183,16 @@ function documentUpdated(){
 }
 
 function save(name, content){
-    set(id, [{name: name, content: content, private: false, date: createdDate(), modified: Date()}], customStore)
-        .then(() => console.log('It worked!'))
-        .catch(err => console.log('It failed!', err));
+    set(
+        id, 
+        [{
+            name: name, 
+            content: content, 
+            private: false, 
+            created: createdDate(), 
+            modified: Date()
+        }], 
+        customStore)
 }
 
 // Get a created date
@@ -190,7 +206,7 @@ let titleChangeOnce = once(function(){
     return name
 })
 
-// Process timed events
+// Process timing events
 function debounce(callback, wait) {
   let timeout;
   return (...args) => {
@@ -206,13 +222,18 @@ editor.addEventListener('keyup', debounce( () => {
     documentUpdated()
 }, 1000))
 
-// Search results modal
-function searchResults(){
+// Pop results inside modal
+function popModal(results){
     document.getElementById('modal_1').checked = true
 }
-//searchResults()
 
-// Once function
+// Browse button
+document.getElementById("browse").addEventListener("click", () => {
+    keys(customStore).then(keys => console.log(keys));
+    //popModal(results)
+})
+
+// Handle once function
 function once(fn, context) { 
 	var result;
 
