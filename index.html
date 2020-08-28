@@ -234,11 +234,12 @@ editor.addEventListener('keyup', debounce( () => {
 
 // Browse button & modal
 document.getElementById("browse").addEventListener("click", () => {
-    keys(customStore).then(keys => {
+    let modalContent = document.getElementById("modal_content")
+    modalContent.innerHTML=""
+    let files = keys(customStore).then(keys => {
         keys.forEach(item => {
             let name=get(item, customStore).then(val => {
                 console.log(val[0].name)
-                let modalContent = document.getElementById("modal_content")
                 let content = document.createElement("div")
                 content.setAttribute("style","display: block")
                 content.innerHTML = val[0].name
@@ -249,7 +250,7 @@ document.getElementById("browse").addEventListener("click", () => {
         modal.textContent = "Browse"
         document.getElementById('modal_1').checked = true
     });
-    
+    files = null
 })
 // Handle once function
 function once(fn, context) { 
