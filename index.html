@@ -162,9 +162,12 @@ var quill = new Quill('#editor', {
   scrollingContainer: 'body'
 })
 newDoc()
-function newDoc(){
+let id
+function newDoc(id){
     // Jot.ooo // Main application
-    let id = generateId() //Generate new document ID
+    if(!id){
+        id = generateId() //Generate new document ID
+    }
     let legend = document.getElementById("title")
     let editor = document.getElementsByClassName("ql-editor")[0]
     let content = editor.textContent = ""
