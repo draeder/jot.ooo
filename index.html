@@ -14,7 +14,6 @@
 </head>
 
 <style>
-
 html {
     height: 100%;
     
@@ -100,9 +99,6 @@ article {
 }
 </style>
 <body>
-    <!--header>
-
-    </header-->
     <section id="search-container">
         <input type="text" placeholder="Search . . . ">
     </section>
@@ -118,7 +114,6 @@ article {
     <section>
         <legend id="title" contenteditable="true" class="single-line">Untitled</legend>
         <div id="editor">
-
         </div>
     </section>
     <!-- Searh results modal -->
@@ -140,8 +135,6 @@ article {
             </footer>
         </article>
     </div>
-    <!--hidden button to display search results-->
-    <!--label for="modal_1" class="button" style="visibility: hidden"></label-->
     <div id="editor-container" style="height: 100px"></div>
 </body>
 <script type="module">
@@ -168,84 +161,84 @@ var quill = new Quill('#editor', {
   theme: 'snow', 
   scrollingContainer: 'body'
 })
+newDoc()
+function newDoc(){
+    // Jot.ooo // Main application
+    let id = generateId() //Generate new document ID
+    let legend = document.getElementById("title")
+    let editor = document.getElementsByClassName("ql-editor")[0]
+    let content = editor.textContent = ""
+    let name = legend.textContent = "Untitled"
 
-// Jot.ooo // Main application
-let id = generateId() //Generate new document ID upon load
-let legend = document.getElementById("title")
+    // Get a created date
+    let createdDate = once(function(){
+        return Date()
+    })
 
-// Change document name 
-legend.addEventListener('keyup', debounce( () => {
-    documentUpdated()
-},1000))
-
-// Process document changes (Auto-save draft, send updates to colaborators, etc.)
-function documentUpdated(){
-    let name = legend.textContent
-    if(name == "Untitled"){
-        let name = titleChangeOnce()
+    // Process document changes (Auto-save draft, send updates to colaborators, etc.)
+    function documentUpdated(){
+        //let name = legend.textContent
+        if(name == "Untitled"){
+            name = titleChangeOnce()
+            content = editor.innerHTML
+        } else {
+            name = legend.textContent
+            content = editor.innerHTML
+        }
+        save(name, content)
     }
-    let content = editor.innerHTML
-    save(name, content)
-}
 
-function save(name, content){
-    set(
-        id, 
-        [{
-            name: name, 
-            content: content, 
-            private: false, 
-            created: createdDate(), 
-            modified: Date()
-        }], 
-        customStore)
-}
-
-// Get a created date
-let createdDate = once(function(){
-    return Date()
-})
-
-// Name document after initially entered text (30 characters)
-let titleChangeOnce = once(function(){
-    let content = editor.textContent
-    if(content){
-        let name = shorten(editor.textContent, 30)
-        legend.textContent = name
-        return name
+    function save(name, content){
+        set(
+            id, 
+            [{
+                name: name, 
+                content: content, 
+                private: false, 
+                created: createdDate(), 
+                modified: Date()
+            }], 
+            customStore)
     }
-})
 
-function shorten(text,max) {
-    return text && text.length > max ? text.slice(0,max).split(' ').slice(0, -1).join(' ') : text
+    // Name document after initially entered text (30 characters)
+    let titleChangeOnce = once(function(){
+        content = editor.textContent
+        if(content){
+            let name = shorten(editor.textContent, 30)
+            legend.textContent = name
+            return name
+        }
+    })
+
+    function shorten(text,max) {
+        return text && text.length > max ? text.slice(0,max).split(' ').slice(0, -1).join(' ') : text
+    }
+
+    // Save typed content
+    editor.addEventListener('keyup', debounce( () => {
+        documentUpdated()
+    }, 1000))
+
+    // Change document name 
+    legend.addEventListener('keyup', debounce( () => {
+        documentUpdated()
+    },1000))
 }
-
-// Process timing events
-function debounce(callback, wait) {
-  let timeout;
-  return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(function () { callback.apply(this, args) }, wait);
-  };
-}
-
-// Process stopped typing event
-let editor = document.getElementsByClassName("ql-editor")[0]
-editor.addEventListener('keyup', debounce( () => {
-    documentUpdated()
-}, 750))
 
 // New button
 document.getElementById("new").addEventListener("click", () => {
-    newDocument()
+    newDoc()
 })
 
-//new document (needs work )
-function newDocument(){
-    location.reload();
+// Process timing events
+function debounce(callback, wait) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(function () { callback.apply(this, args) }, wait);
+    };
 }
-
-
 // Browse button & modal
 document.getElementById("browse").addEventListener("click", () => {
     let modalContent = document.getElementById("modal_content")
@@ -268,9 +261,8 @@ document.getElementById("browse").addEventListener("click", () => {
 })
 
 // Handle once function
-function once(fn, context, repeat) { 
+function once(fn, context) { 
 	let result;
-    let again = fn;
 	return function() { 
 		if(fn) {
 			result = fn.apply(context || this, arguments);
