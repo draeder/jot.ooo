@@ -227,6 +227,8 @@ let initialName = function() {
 
 //save changes
 editor.addEventListener('keyup', debounce( () => {
+    id=id
+    console.log(id)
     let name = initialName()
     initialName = function(){} //disables initialName function
     name = legend.textContent
@@ -236,10 +238,9 @@ editor.addEventListener('keyup', debounce( () => {
 }, 1000))
 
 function save(id, name, contents, secret){
-    if(!id){
+    if(!id && !contents){
         id=generateId()
-    }
-    if(!contents){
+        console.log(id)
         contents = " "
     }
     set(
