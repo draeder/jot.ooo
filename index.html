@@ -108,7 +108,7 @@ article {
             <input type="checkbox" id="private">
             <span class="checkable">Private</span>
         </label>
-        <label class="button dangerous">Delete</label>
+        <label class="button" id="delete">Delete</label>
         <label class="button" id="browse">Browse</label>
     </section>
     <section>
@@ -253,6 +253,12 @@ function save(id, name, contents, secret){
         customStore)
 }
 
+// Delete
+document.getElementById("delete").addEventListener("click", () => {
+    del(id, customStore)
+    newDoc()
+})
+
 // Browse button & modal
 document.getElementById("browse").addEventListener("click", () => {
     browse()
@@ -293,6 +299,7 @@ function browse(){
     document.getElementById('modal_1').checked = true
 }
 
+//Search and modal
 search.addEventListener("keyup", (e) => {
     if(event.code == "Enter"){
         searcher()
@@ -302,7 +309,7 @@ search.addEventListener("click", () => {
     search.value = ""
 })
 function searcher(){
-    search.value = ""
+    
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
     let searchTerm = search.value
@@ -336,6 +343,7 @@ function searcher(){
     let modal = document.getElementById('modal_title')
     modal.textContent = "Search"
     document.getElementById('modal_1').checked = true
+    search.value = ""
 }
 
 // Get a created date
