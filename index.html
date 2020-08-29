@@ -254,6 +254,16 @@ function save(id, name, contents, secret){
         }], 
         customStore)
 }
+// Private 
+secret.addEventListener("click", () => {
+    console.log(id)
+    get(id, customStore).then(val => {
+        let name = val[0].name
+        let content = val[0].content
+        let checkbox = secret.checked
+        save(id, name, content, checkbox)
+    })
+})
 
 // Delete
 document.getElementById("delete").addEventListener("click", () => {
