@@ -178,6 +178,7 @@ function newDoc(){
     id = generateId()
     legend.textContent = "Untitled"
     editor.innerHTML = ""
+    secret.checked = false
     console.log("New doc with id " + id)
     initialName = again //resets initialName function
 }
@@ -268,6 +269,7 @@ function browse(){
                     console.log(`Item ${item} was clicked.`)
                     id=item
                     loadDoc(item)
+                    document.getElementById('modal_1').checked = false
                 })
                 results.setAttribute("style","display: block")
                 results.innerHTML = val[0].name
