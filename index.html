@@ -139,7 +139,7 @@ article {
 </body>
 <script type="module">
 // Database
-import { Store, keys, get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@3/dist/idb-keyval.mjs';
+import { Store, keys, get, set, del } from 'https://cdn.jsdelivr.net/npm/idb-keyval@3/dist/idb-keyval.mjs';
 
 const customStore = new Store('jot-db', 'jots');
 
@@ -155,7 +155,7 @@ var quill = new Quill('#editor', {
     toolbar: [
         ['code-block', 'clean'],
         ['bold', 'italic', 'underline'],
-        [{ header: [1, 2, false] }],
+        [{ header: [1, 2, 3, 4, false] }],
     ]
   },
   theme: 'snow', 
@@ -223,14 +223,11 @@ let initialName = function() {
 
 //save changes
 editor.addEventListener('keyup', debounce( () => {
-    console.log("gothere")
     let name = initialName()
     initialName = function(){} //disables initialName function
-    console.log(name)
     name = legend.textContent
     let contents = editor.innerHTML
     let checkbox = secret.checked
-    console.log(checkbox)
     save(id, name, contents, checkbox)
 }, 1000))
 
@@ -240,7 +237,9 @@ function save(id, name, contents, secret){
         console.log("generating a new ID")
         id=generateId()
     }
-    console.log("Saving with id " + id)
+    if(!contents){
+        contents = " "
+    }
     set(
         id, 
         [{
@@ -261,6 +260,14 @@ function browse(){
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
     let files = keys(customStore).then(keys => {
+        console.log(keys)
+        if(keys.length===0){
+            let results = document.createElement("div")
+            results.setAttribute("style","display: block")
+            results.innerHTML=`<h3>There's nothing here.</h3> 
+            <h4>Jot something down and check back later!</h4>`
+            modalContent.append(results)
+        }
         keys.forEach(item => {
             let name=get(item, customStore).then(val => {
                 console.log(val[0].name)
@@ -271,7 +278,10 @@ function browse(){
                     loadDoc(item)
                     document.getElementById('modal_1').checked = false
                 })
-                results.setAttribute("style","display: block")
+                results.onmouseover = function(){
+                    results.style.cursor = "pointer";
+                }
+                results.setAttribute("style","display: block; font-weight:bold;")
                 results.innerHTML = val[0].name
                 modalContent.append(results)
             })
