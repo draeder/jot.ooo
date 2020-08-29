@@ -170,7 +170,6 @@ let secret = document.getElementById("private")
 let search = document.getElementById("search")
 
 document.getElementById("new").addEventListener("click", () => {
-    console.log("clicked new")
     id = null
     newDoc()
 })
@@ -180,14 +179,11 @@ function newDoc(){
     legend.textContent = "Untitled"
     editor.innerHTML = ""
     secret.checked = false
-    console.log("New doc with id " + id)
     initialName = again //resets initialName function
 }
 
 function loadDoc(id){
     id=id
-    console.log(id)
-    console.log("Load existing doc")
     let item = get(id, customStore).then(item => {
         legend.textContent = item[0].name
         editor.innerHTML = item[0].content
@@ -204,7 +200,16 @@ function rename(id){
     id=id
     let name = legend.textContent
     let contents = editor.innerHTML
-    save(id, name, contents, secret)
+    let checkbox = secret.checked
+    if(!id){
+        id = generateId()
+    }
+    if(!contents){
+        contents = " "
+    }
+
+    console.log(id)
+    save(id, name, contents, checkbox)
 }
 function shorten(text,max) {
     return text && text.length > max ? text.slice(0,max).split(' ').slice(0, -1).join(' ') : text
@@ -233,9 +238,7 @@ editor.addEventListener('keyup', debounce( () => {
 }, 1000))
 
 function save(id, name, contents, secret){
-    console.log("Saving " + contents + " for file " + name)
     if(!id){
-        console.log("generating a new ID")
         id=generateId()
     }
     if(!contents){
@@ -311,7 +314,6 @@ function searcher(){
     modalContent.innerHTML=""
     let searchTerm = search.value
     searchTerm = searchTerm.toLowerCase()
-    console.log(searchTerm)
     let files = keys(customStore).then(keys => {
         keys.forEach(item => {
             let results = get(item, customStore).then(val => {
