@@ -100,7 +100,7 @@ article {
 </style>
 <body>
     <section id="search-container">
-        <input type="text" placeholder="Search . . . ">
+        <input type="text" placeholder="Search . . . " id="search">
     </section>
     <section id="nav">
         <label class="button" id="new">New</label>
@@ -167,6 +167,7 @@ let id
 let legend = document.getElementById("title")
 let editor = document.getElementsByClassName("ql-editor")[0]
 let secret = document.getElementById("private")
+let search = document.getElementById("search")
 
 document.getElementById("new").addEventListener("click", () => {
     console.log("clicked new")
@@ -286,12 +287,52 @@ function browse(){
                 modalContent.append(results)
             })
         })
-        let modal = document.getElementById('modal_title')
-        modal.textContent = "Browse"
-        document.getElementById('modal_1').checked = true
-    });
-    files = null
+    })
+    let modal = document.getElementById('modal_title')
+    modal.textContent = "Browse"
+    document.getElementById('modal_1').checked = true
 }
+
+search.addEventListener("keyup", (e) => {
+    if(event.code == "Enter"){
+        searcher()
+    }
+})
+function searcher(){
+    let modalContent = document.getElementById("modal_content")
+    modalContent.innerHTML=""
+    let searchTerm = search.value
+    let files = keys(customStore).then(keys => {
+        keys.forEach(item => {
+            let results = get(item, customStore).then(val => {
+                console.log(val[0].content)
+                if(val[0].content){
+                    let find = val[0].content
+                    let bool = find.includes(searchTerm)
+                    if(bool == true){
+                        let results = document.createElement("div")
+                        results.addEventListener("click", () => {
+                            console.log(`Item ${item} was clicked.`)
+                            id=item
+                            loadDoc(item)
+                            document.getElementById('modal_1').checked = false
+                        })
+                        results.onmouseover = function(){
+                            results.style.cursor = "pointer";
+                        }
+                        results.setAttribute("style","display: block; font-weight:bold;")
+                        results.innerHTML = val[0].name
+                        modalContent.append(results)
+                    }
+                }
+            })
+        })
+    })
+    let modal = document.getElementById('modal_title')
+    modal.textContent = "Search"
+    document.getElementById('modal_1').checked = true
+}
+
 // Get a created date
 let createdDate = once(function(){
     return Date()
