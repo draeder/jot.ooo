@@ -298,21 +298,25 @@ search.addEventListener("keyup", (e) => {
         searcher()
     }
 })
+search.addEventListener("click", () => {
+    search.value = ""
+})
 function searcher(){
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
     let searchTerm = search.value
+    searchTerm = searchTerm.toLowerCase()
+    console.log(searchTerm)
     let files = keys(customStore).then(keys => {
         keys.forEach(item => {
             let results = get(item, customStore).then(val => {
-                console.log(val[0].content)
                 if(val[0].content){
                     let find = val[0].content
+                    find = find.toLowerCase()
                     let bool = find.includes(searchTerm)
                     if(bool == true){
                         let results = document.createElement("div")
                         results.addEventListener("click", () => {
-                            console.log(`Item ${item} was clicked.`)
                             id=item
                             loadDoc(item)
                             document.getElementById('modal_1').checked = false
