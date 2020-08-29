@@ -57,7 +57,9 @@ input {
 }
 article {
     max-width: 10vw;
+    min-width: 40vw
 }
+
 #modal_header {
     background-color: #788585;
 }
@@ -65,6 +67,7 @@ article {
     color: white;
 }
 #modal_content{
+    width:600px;
     color: black;
     height: 20em;
     overflow-y: scroll;
@@ -104,7 +107,7 @@ article {
         <input type="text" placeholder="Search . . . ">
     </section>
     <section id="nav">
-        <label class="button">New</label>
+        <label class="button" id="new">New</label>
         <label>
             <input type="checkbox">
             <span class="checkable">Private</span>
@@ -203,7 +206,7 @@ let createdDate = once(function(){
     return Date()
 })
 
-// Name document after first line of entered text
+// Name document after initially entered text (30 characters)
 let titleChangeOnce = once(function(){
     let content = editor.textContent
     if(content){
@@ -232,6 +235,17 @@ editor.addEventListener('keyup', debounce( () => {
     documentUpdated()
 }, 750))
 
+// New button
+document.getElementById("new").addEventListener("click", () => {
+    newDocument()
+})
+
+//new document (needs work )
+function newDocument(){
+    location.reload();
+}
+
+
 // Browse button & modal
 document.getElementById("browse").addEventListener("click", () => {
     let modalContent = document.getElementById("modal_content")
@@ -252,10 +266,11 @@ document.getElementById("browse").addEventListener("click", () => {
     });
     files = null
 })
-// Handle once function
-function once(fn, context) { 
-	var result;
 
+// Handle once function
+function once(fn, context, repeat) { 
+	let result;
+    let again = fn;
 	return function() { 
 		if(fn) {
 			result = fn.apply(context || this, arguments);
