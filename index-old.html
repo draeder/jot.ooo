@@ -105,7 +105,7 @@ article {
     <section id="nav">
         <label class="button" id="new">New</label>
         <label>
-            <input type="checkbox" id="private">
+            <input type="checkbox">
             <span class="checkable">Private</span>
         </label>
         <label class="button dangerous">Delete</label>
@@ -166,97 +166,101 @@ var quill = new Quill('#editor', {
 let id
 let legend = document.getElementById("title")
 let editor = document.getElementsByClassName("ql-editor")[0]
-let secret = document.getElementById("private")
+let content = editor.textContent = ""
+let name = legend.textContent = "Untitled"
+newDoc(id)
+function newDoc(id){
+    if(!id){
+        id = generateId() //Generate new document ID
+        content = editor.textContent = ""
+        name = legend.textContent = "Untitled"
+    } else {
+        let loadFile = get(id, customStore).then(item => {
+            console.log(item[0].name)
+            legend.textContent = item[0].name
+            console.log(item[0].content)
+            editor.innerHTML = item[0].content
+        })
+    }
 
+    // Process document changes (Auto-save draft, send updates to colaborators, etc.)
+    function documentUpdated(id){
+        //let name = legend.textContent
+        if(name == "Untitled"){
+            name = titleChangeOnce()
+            content = editor.innerHTML
+        } else {
+            name = legend.textContent
+            content = editor.innerHTML
+        }
+        console.log(`working with id ${id}`)
+        save(id, name, content)
+    }
+
+    // Name document after initially entered text (30 characters)
+    let titleChangeOnce = once(function(){
+        content = editor.textContent
+        if(content){
+            let name = shorten(editor.textContent, 30)
+            legend.textContent = name
+            return name
+        }
+    })
+
+    function shorten(text,max) {
+        return text && text.length > max ? text.slice(0,max).split(' ').slice(0, -1).join(' ') : text
+    }
+
+    // Save typed content
+    editor.addEventListener('keyup', debounce( () => {
+        console.log(`working with id ${id}`)
+        documentUpdated(id)
+    }, 1000))
+
+    // Change document name 
+    legend.addEventListener('keyup', debounce( () => {
+        console.log(`working with id ${id}`)
+        documentUpdated(id)
+    },1000))
+
+    // Process timing events
+    function debounce(callback, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(function () { callback.apply(this, args) }, wait);
+        };
+    }
+}
+
+// New button
 document.getElementById("new").addEventListener("click", () => {
     console.log("clicked new")
     id = null
-    newDoc()
+    newDoc(id)
 })
-
-function newDoc(){
-    id = generateId()
-    legend.textContent = "Untitled"
-    editor.innerHTML = ""
-    console.log("New doc with id " + id)
-    initialName = again //resets initialName function
-}
-
-function loadDoc(id){
-    id=id
-    console.log(id)
-    console.log("Load existing doc")
-    let item = get(id, customStore).then(item => {
-        legend.textContent = item[0].name
-        editor.innerHTML = item[0].content
-        secret.checked = item[0].private
+    // Get a created date
+    let createdDate = once(function(){
+        return Date()
     })
-    initialName = function(){}
-}
 
-legend.addEventListener('keyup', debounce( () => {
-    rename(id)
-},750))
-
-function rename(id){
-    id=id
-    let name = legend.textContent
-    let contents = editor.innerHTML
-    save(id, name, contents, secret)
-}
-function shorten(text,max) {
-    return text && text.length > max ? text.slice(0,max).split(' ').slice(0, -1).join(' ') : text
-}
-
-//set initial name
-let initialName = function() { 
-    console.log("initialName")
-    let name = editor.textContent
-    if(name){
-        name = shorten(editor.textContent, 30)
-        legend.textContent = name
-        console.log("renamed to " +name)
+function save(id, name, content){
+        console.log("Saving with id " + id)
+        set(
+            id, 
+            [{
+                name: name, 
+                content: content, 
+                private: false, 
+                created: createdDate(), 
+                modified: Date()
+            }], 
+            customStore)
     }
-    return name
-},again = initialName //stores initialName function
 
-//save changes
-editor.addEventListener('keyup', debounce( () => {
-    console.log("gothere")
-    let name = initialName()
-    initialName = function(){} //disables initialName function
-    console.log(name)
-    name = legend.textContent
-    let contents = editor.innerHTML
-    let checkbox = secret.checked
-    console.log(checkbox)
-    save(id, name, contents, checkbox)
-}, 1000))
-
-function save(id, name, contents, secret){
-    console.log("Saving " + contents + " for file " + name)
-    if(!id){
-        console.log("generating a new ID")
-        id=generateId()
-    }
-    console.log("Saving with id " + id)
-    set(
-        id, 
-        [{
-            name: name, 
-            content: contents, 
-            private: secret, 
-            created: createdDate(), 
-            modified: Date()
-        }], 
-        customStore)
-}
 
 // Browse button & modal
 document.getElementById("browse").addEventListener("click", () => {
-    browse()
-})
-function browse(){
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
     let files = keys(customStore).then(keys => {
@@ -266,8 +270,7 @@ function browse(){
                 let results = document.createElement("div")
                 results.addEventListener("click", () => {
                     console.log(`Item ${item} was clicked.`)
-                    id=item
-                    loadDoc(item)
+                    newDoc(item)
                 })
                 results.setAttribute("style","display: block")
                 results.innerHTML = val[0].name
@@ -279,12 +282,9 @@ function browse(){
         document.getElementById('modal_1').checked = true
     });
     files = null
-}
-// Get a created date
-let createdDate = once(function(){
-    return Date()
 })
-// Once function
+
+// Handle once function
 function once(fn, context) { 
 	let result;
 	return function() { 
@@ -296,14 +296,13 @@ function once(fn, context) {
 	};
 }
 
-// Process timing events
-function debounce(callback, wait) {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(function () { callback.apply(this, args) }, wait);
-    };
-}
+// Usage
+//var canOnlyFireOnce = once(function() {
+//	console.log('Fired!');
+//});
+
+//canOnlyFireOnce(); // "Fired!"
+//canOnlyFireOnce(); // nada
 
 //generate crypto hash
 function generateId (len) {
