@@ -153,7 +153,7 @@ var quill = new Quill('#editor', {
   modules: {
     syntax: true,              // Include syntax module
     toolbar: [
-        ['code-block', 'clean'],
+        ['code-block', 'link', 'clean'],
         ['bold', 'italic', 'underline'],
         [{ header: [1, 2, 3, 4, false] }],
     ]
@@ -267,7 +267,6 @@ function browse(){
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
     let files = keys(customStore).then(keys => {
-        console.log(keys)
         if(keys.length===0){
             let results = document.createElement("div")
             results.setAttribute("style","display: block")
@@ -277,10 +276,8 @@ function browse(){
         }
         keys.forEach(item => {
             let name=get(item, customStore).then(val => {
-                console.log(val[0].name)
                 let results = document.createElement("div")
                 results.addEventListener("click", () => {
-                    console.log(`Item ${item} was clicked.`)
                     id=item
                     loadDoc(item)
                     document.getElementById('modal_1').checked = false
