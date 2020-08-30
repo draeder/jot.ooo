@@ -113,10 +113,8 @@ article {
         </label>
         <label class="button" id="delete">Delete</label>
         <label class="button" id="browse">Browse</label>
-        <label>
-            <input type="checkbox" id="sync">
-            <span class="checkable">Sync</span>
-        </label>
+        <label type="button" id="sync">Sync</label>
+
     </section>
     <section>
         <legend id="title" contenteditable="true" class="single-line">Untitled</legend>
@@ -185,7 +183,6 @@ b.on("seen", function(addr) {
                 let items = val[0]
                 let id = item
                 if(items.private === false){
-                    console.log(items)
                     let message = {   
                         id, 
                         name: items.name, 
@@ -325,6 +322,29 @@ secret.addEventListener("click", () => {
             save(id, name, content, checkbox)
         }
     })
+})
+
+// Sync
+let syncOn = document.getElementById("sync")
+syncOn.addEventListener("click", () => {
+    let sync = document.location + "/?j" + b.address()
+    let qr = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+sync
+    console.log("Sync is on")
+    let modalContent = document.getElementById("modal_content")
+    modalContent.innerHTML=""
+    let modal = document.getElementById('modal_title')
+    modal.textContent = "P2P Sync"
+    let results = document.createElement("div")
+    results.setAttribute("style","display: block")
+    results.innerHTML=`<h3>Sync your jots with another device</h3> 
+                    <h5>QR Code</h5>
+                    <img src="${qr}"/>
+                    <h5>URL</h5>
+                    <a href="${sync}">${sync}</a>
+    `
+    modalContent.append(results)
+    document.getElementById('modal_1').checked = true
+    
 })
 
 // Delete
