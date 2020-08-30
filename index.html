@@ -414,21 +414,15 @@ search.addEventListener("keyup", (e) => {
 search.addEventListener("click", () => {
     search.value = ""
 })
+let modal = document.getElementById('modal_title')
+let modalContent = document.getElementById("modal_content")
 function searcher(){
-    
-    let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
     let searchTerm = search.value
     searchTerm = searchTerm.toLowerCase()
-    let results = document.createElement("div")
-    results.setAttribute("style","display: block; font-weight:bold;")
-    results.innerHTML = `
-        <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${searchTerm}'</h3>
-    `
-    modalContent.append(results)
     let files = keys(customStore).then(keys => {
         keys.forEach(item => {
-            results = get(item, customStore).then(val => {
+            let results = get(item, customStore).then(val => {
                 if(val[0].content){
                     let find = val[0].content
                     find = find.toLowerCase()
@@ -446,19 +440,25 @@ function searcher(){
                         results.setAttribute("style","display: block; font-weight:bold;")
                         results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585;"></i> ${val[0].name}`
                         modalContent.append(results)
-                    } else {
-
                     }
                 }
             })
         })
     })
-    let modal = document.getElementById('modal_title')
     modal.textContent = "Search"
     document.getElementById('modal_1').checked = true
     search.value = ""
 }
-
+function notFound(term){
+    let results = document.createElement("div")
+        results.setAttribute("style","display: block; font-weight:bold;")
+        results.innerHTML = `
+            <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${term}'</h3>
+        `
+        modal.textContent = "Search"
+        modalContent.append(results)
+        document.getElementById('modal_1').checked = true
+}
 // Get a created date
 let createdDate = once(function(){
     return Date()
