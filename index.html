@@ -113,7 +113,10 @@ article {
         </label>
         <label class="button" id="delete">Delete</label>
         <label class="button" id="browse">Browse</label>
-        <label class="button" id="sync">Sync</label>
+        <label>
+            <input type="checkbox" id="sync">
+            <span class="checkable">Sync</span>
+        </label>
     </section>
     <section>
         <legend id="title" contenteditable="true" class="single-line">Untitled</legend>
@@ -308,12 +311,19 @@ function save(id, name, contents, secret){
 }
 // Private 
 secret.addEventListener("click", () => {
+    if(!id){
+        id=generateId()
+    }
     console.log(id)
     get(id, customStore).then(val => {
-        let name = val[0].name
-        let content = val[0].content
-        let checkbox = secret.checked
-        save(id, name, content, checkbox)
+        if(val == null){
+            return
+        } else {
+            let name = val[0].name
+            let content = val[0].content
+            let checkbox = secret.checked
+            save(id, name, content, checkbox)
+        }
     })
 })
 
