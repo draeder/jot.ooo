@@ -176,6 +176,27 @@ console.log(b.address())
 
 b.on("seen", function(addr) {
     console.log("Peer connected: " + addr)
+    send()
+})
+
+b.on("server", function(address) {
+    console.log("Connected to server")
+})
+b.on("message", function(address, message){
+    set(message.id,        
+        [{
+            name: message.name, 
+            content: message.content, 
+            private: message.secret, 
+            created: message.created, 
+            modified: message.modified
+        }], 
+        customStore)
+})
+
+// Send jots
+
+function send(){
     keys(customStore).then(keys => {
         keys.forEach(item => {
             get(item, customStore).then(val => {
@@ -196,22 +217,7 @@ b.on("seen", function(addr) {
             })
         })
     })
-})
-
-b.on("server", function(address) {
-    console.log("Connected to server")
-})
-b.on("message", function(address, message){
-    set(message.id,        
-        [{
-            name: message.name, 
-            content: message.content, 
-            private: message.secret, 
-            created: message.created, 
-            modified: message.modified
-        }], 
-        customStore)
-})
+}
 
 // Jot.ooo // Main application
 let id
@@ -305,6 +311,7 @@ function save(id, name, contents, secret){
             modified: Date()
         }], 
         customStore)
+    send()
 }
 // Private 
 secret.addEventListener("click", () => {
