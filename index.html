@@ -395,7 +395,7 @@ function browse(){
                     results.style.cursor = "pointer";
                 }
                 results.setAttribute("style","display: block; font-weight:bold;")
-                results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585"></i> ${val[0].name}`
+                results.innerHTML = `<i class="fas fa-file-alt" style="color: #208BA6"></i> ${val[0].name}`
                 modalContent.append(results)
             })
         })
@@ -419,6 +419,7 @@ let modalContent = document.getElementById("modal_content")
 function searcher(){
     modalContent.innerHTML=""
     let searchTerm = search.value
+    let bool
     searchTerm = searchTerm.toLowerCase()
     let files = keys(customStore).then(keys => {
         keys.forEach(item => {
@@ -426,7 +427,8 @@ function searcher(){
                 if(val[0].content){
                     let find = val[0].content
                     find = find.toLowerCase()
-                    let bool = find.includes(searchTerm)
+                    bool = find.includes(searchTerm)
+                    console.log(bool)
                     if(bool == true){
                         let results = document.createElement("div")
                         results.addEventListener("click", () => {
@@ -440,6 +442,16 @@ function searcher(){
                         results.setAttribute("style","display: block; font-weight:bold;")
                         results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585;"></i> ${val[0].name}`
                         modalContent.append(results)
+                    } else {
+                        if (bool === false){
+                            let results = document.createElement("div")
+                            results.setAttribute("style","display: block; font-weight:bold;")
+                            results = `
+                                <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${searchTerm}'</h3>
+                            `
+                            modal.textContent = "Search"
+                            modalContent.innerHTML=results
+                        }
                     }
                 }
             })
