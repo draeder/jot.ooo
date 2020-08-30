@@ -361,6 +361,7 @@ syncOn.addEventListener("click", () => {
 
 // Delete
 document.getElementById("delete").addEventListener("click", () => {
+    if(!id) return
     del(id, customStore)
     newDoc()
 })
