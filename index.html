@@ -281,7 +281,6 @@ let initialName = function() {
     if(name){
         name = shorten(editor.textContent, 30)
         legend.textContent = name
-        console.log("renamed to " +name)
     }
     return name
 },again = initialName //stores initialName function
@@ -289,7 +288,6 @@ let initialName = function() {
 //save changes
 editor.addEventListener('keyup', debounce( () => {
     id=id
-    console.log(id)
     if(!id){
         console.log("generating new id")
         id = generateId
@@ -343,7 +341,6 @@ let syncOn = document.getElementById("sync")
 syncOn.addEventListener("click", () => {
     let sync = document.location + "?j=" + b.address()
     let qr = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data="+sync
-    console.log("Sync is on")
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
     let modal = document.getElementById('modal_title')
@@ -351,7 +348,7 @@ syncOn.addEventListener("click", () => {
     let results = document.createElement("div")
     results.setAttribute("style","display: block")
     results.innerHTML=`<h3>Sync your jots with another device</h3>
-                    <div style="display: block; font-size: .75em">(Only jots not marked "Private" will be synced)</div>
+                    <div style="display: block; font-size: .75em">(Jots marked "Private" will not be synced)</div>
                     <h5>QR Code</h5>
                     <img src="${qr}"/>
                     <h5>URL</h5>
@@ -419,7 +416,7 @@ let modalContent = document.getElementById("modal_content")
 function searcher(){
     modalContent.innerHTML=""
     let searchTerm = search.value
-    let bool
+    let found = false
     searchTerm = searchTerm.toLowerCase()
     let files = keys(customStore).then(keys => {
         keys.forEach(item => {
@@ -427,10 +424,13 @@ function searcher(){
                 if(val[0].content){
                     let find = val[0].content
                     find = find.toLowerCase()
-                    bool = find.includes(searchTerm)
-                    console.log(bool)
-                    if(bool == true){
-                        let results = document.createElement("div")
+                    let bool = find.includes(searchTerm, function(found){
+                        found = true
+                        return found
+                    })
+                    if(bool === true){
+                        //found = true
+                        results = document.createElement("div")
                         results.addEventListener("click", () => {
                             id=item
                             loadDoc(item)
@@ -442,17 +442,16 @@ function searcher(){
                         results.setAttribute("style","display: block; font-weight:bold;")
                         results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585;"></i> ${val[0].name}`
                         modalContent.append(results)
-                    } else {
-                        if (bool === false){
-                            let results = document.createElement("div")
-                            results.setAttribute("style","display: block; font-weight:bold;")
-                            results = `
-                                <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${searchTerm}'</h3>
-                            `
-                            modal.textContent = "Search"
-                            modalContent.innerHTML=results
-                        }
+                    } else if (found === false){
+                        let results = document.createElement("div")
+                        results.setAttribute("style","display: block; font-weight:bold;")
+                        results = `
+                            <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${searchTerm}'</h3>
+                        `
+                        modal.textContent = "Search"
+                        modalContent.innerHTML=results
                     }
+                    
                 }
             })
         })
@@ -460,16 +459,6 @@ function searcher(){
     modal.textContent = "Search"
     document.getElementById('modal_1').checked = true
     search.value = ""
-}
-function notFound(term){
-    let results = document.createElement("div")
-        results.setAttribute("style","display: block; font-weight:bold;")
-        results.innerHTML = `
-            <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${term}'</h3>
-        `
-        modal.textContent = "Search"
-        modalContent.append(results)
-        document.getElementById('modal_1').checked = true
 }
 // Get a created date
 let createdDate = once(function(){
