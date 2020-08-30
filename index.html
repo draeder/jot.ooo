@@ -336,7 +336,7 @@ secret.addEventListener("click", () => {
 let syncOn = document.getElementById("sync")
 syncOn.addEventListener("click", () => {
     let sync = document.location + "?j=" + b.address()
-    let qr = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+sync
+    let qr = "https://api.qrserver.com/v1/create-qr-code/?size=75x75&data="+sync
     console.log("Sync is on")
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
@@ -344,11 +344,12 @@ syncOn.addEventListener("click", () => {
     modal.textContent = "P2P Sync"
     let results = document.createElement("div")
     results.setAttribute("style","display: block")
-    results.innerHTML=`<h3>Sync your jots with another device</h3> 
+    results.innerHTML=`<h3>Sync your jots with another device</h3>
+                    <div style="display: block; font-size: .75em">(Only jots not marked "Private" will be synced)</div>
                     <h5>QR Code</h5>
                     <img src="${qr}"/>
                     <h5>URL</h5>
-                    <a href="${sync}">${sync}</a>
+                    <a href="${sync}" style="font-size: .75em">${sync}</a>
     `
     modalContent.append(results)
     document.getElementById('modal_1').checked = true
