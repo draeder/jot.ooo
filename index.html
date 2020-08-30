@@ -336,7 +336,7 @@ secret.addEventListener("click", () => {
 let syncOn = document.getElementById("sync")
 syncOn.addEventListener("click", () => {
     let sync = document.location + "?j=" + b.address()
-    let qr = "https://api.qrserver.com/v1/create-qr-code/?size=75x75&data="+sync
+    let qr = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data="+sync
     console.log("Sync is on")
     let modalContent = document.getElementById("modal_content")
     modalContent.innerHTML=""
