@@ -173,31 +173,9 @@ let address = params.get('j')
 let b = new Bugout(address || {seed: localStorage["bugout-server-seed"]})
 localStorage["bugout-server-seed"] = b.seed
 console.log(b.address())
-let addr
+
 b.on("seen", function(addr) {
     console.log("Peer connected: " + addr)
-    addr = addr
-    send(addr)
-})
-
-b.on("server", function(address) {
-    console.log("Connected to server")
-})
-b.on("message", function(address, message){
-    set(message.id,        
-        [{
-            name: message.name, 
-            content: message.content, 
-            private: message.secret, 
-            created: message.created, 
-            modified: message.modified
-        }], 
-        customStore)
-})
-
-// Send jots
-
-function send(addr){
     keys(customStore).then(keys => {
         keys.forEach(item => {
             get(item, customStore).then(val => {
@@ -218,7 +196,22 @@ function send(addr){
             })
         })
     })
-}
+})
+
+b.on("server", function(address) {
+    console.log("Connected to server")
+})
+b.on("message", function(address, message){
+    set(message.id,        
+        [{
+            name: message.name, 
+            content: message.content, 
+            private: message.secret, 
+            created: message.created, 
+            modified: message.modified
+        }], 
+        customStore)
+})
 
 // Jot.ooo // Main application
 let id
@@ -312,7 +305,6 @@ function save(id, name, contents, secret){
             modified: Date()
         }], 
         customStore)
-    send(addr)
 }
 // Private 
 secret.addEventListener("click", () => {
