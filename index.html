@@ -106,6 +106,9 @@ article {
 #sync {
     background-color:goldenrod
 }
+#new{
+    background-color: green
+}
 </style>
 <body>
     <section id="search-container">
@@ -392,7 +395,7 @@ function browse(){
                     results.style.cursor = "pointer";
                 }
                 results.setAttribute("style","display: block; font-weight:bold;")
-                results.innerHTML = val[0].name
+                results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585"></i> ${val[0].name}`
                 modalContent.append(results)
             })
         })
@@ -417,9 +420,15 @@ function searcher(){
     modalContent.innerHTML=""
     let searchTerm = search.value
     searchTerm = searchTerm.toLowerCase()
+    let results = document.createElement("div")
+    results.setAttribute("style","display: block; font-weight:bold;")
+    results.innerHTML = `
+        <h3><i class="far fa-times-circle" style="color: red"></i> No results found for '${searchTerm}'</h3>
+    `
+    modalContent.append(results)
     let files = keys(customStore).then(keys => {
         keys.forEach(item => {
-            let results = get(item, customStore).then(val => {
+            results = get(item, customStore).then(val => {
                 if(val[0].content){
                     let find = val[0].content
                     find = find.toLowerCase()
@@ -435,8 +444,10 @@ function searcher(){
                             results.style.cursor = "pointer";
                         }
                         results.setAttribute("style","display: block; font-weight:bold;")
-                        results.innerHTML = val[0].name
+                        results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585;"></i> ${val[0].name}`
                         modalContent.append(results)
+                    } else {
+
                     }
                 }
             })
