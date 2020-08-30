@@ -281,6 +281,10 @@ let initialName = function() {
 editor.addEventListener('keyup', debounce( () => {
     id=id
     console.log(id)
+    if(!id){
+        console.log("generating new id")
+        id = generateId
+    }
     let name = initialName()
     initialName = function(){} //disables initialName function
     name = legend.textContent
@@ -327,7 +331,7 @@ secret.addEventListener("click", () => {
 // Sync
 let syncOn = document.getElementById("sync")
 syncOn.addEventListener("click", () => {
-    let sync = document.location + "/?j" + b.address()
+    let sync = document.location + "?j=" + b.address()
     let qr = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+sync
     console.log("Sync is on")
     let modalContent = document.getElementById("modal_content")
