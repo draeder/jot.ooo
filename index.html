@@ -379,7 +379,7 @@ function browse(){
         if(keys.length===0){
             let results = document.createElement("div")
             results.setAttribute("style","display: block")
-            results.innerHTML=`<h3><i class="far fa-times-circle" style="color: red"></i> There's nothing here.</h3> 
+            results.innerHTML=`<h3><i class="far fa-times-circle" style="color: darkred"></i> There's nothing here.</h3> 
             <h4>Jot something down and check back later!</h4>`
             modalContent.append(results)
         }
@@ -423,7 +423,7 @@ function searcher(){
     let results = document.createElement("div")
     results.setAttribute("style","display: block; font-weight:bold;")
     results.innerHTML = `
-        <h3><i class="far fa-times-circle" style="color: red"></i> No results found for '${searchTerm}'</h3>
+        <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${searchTerm}'</h3>
     `
     modalContent.append(results)
     let files = keys(customStore).then(keys => {
