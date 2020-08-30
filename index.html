@@ -173,10 +173,11 @@ let address = params.get('j')
 let b = new Bugout(address || {seed: localStorage["bugout-server-seed"]})
 localStorage["bugout-server-seed"] = b.seed
 console.log(b.address())
-
+let addr
 b.on("seen", function(addr) {
     console.log("Peer connected: " + addr)
-    send()
+    addr = addr
+    send(addr)
 })
 
 b.on("server", function(address) {
@@ -196,7 +197,7 @@ b.on("message", function(address, message){
 
 // Send jots
 
-function send(){
+function send(addr){
     keys(customStore).then(keys => {
         keys.forEach(item => {
             get(item, customStore).then(val => {
@@ -311,7 +312,7 @@ function save(id, name, contents, secret){
             modified: Date()
         }], 
         customStore)
-    send()
+    send(addr)
 }
 // Private 
 secret.addEventListener("click", () => {
