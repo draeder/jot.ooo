@@ -172,6 +172,7 @@ let address = params.get('j')
 
 let b = new Bugout(address || {seed: localStorage["bugout-server-seed"]})
 localStorage["bugout-server-seed"] = b.seed
+console.log(b.address())
 
 b.on("seen", function(addr) {
     console.log("Peer connected: " + addr)
@@ -211,6 +212,7 @@ b.on("message", function(address, message){
         }], 
         customStore)
 })
+
 // Jot.ooo // Main application
 let id
 let legend = document.getElementById("title")
