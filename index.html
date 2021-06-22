@@ -196,6 +196,7 @@ fetch('https://invited-subsequent-breeze.glitch.me/trackers')
     start(trackers)
     //setInterval(()=>{bugout(trackers)}, 5000)
 })
+.catch(err => console.log(err))
 
 function start(trackers){
 
