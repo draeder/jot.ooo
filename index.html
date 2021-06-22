@@ -176,324 +176,346 @@ let quill = new Quill('#editor', {
   scrollingContainer: 'body'
 })
 
-// Bugout
-let params = new URL(document.location).searchParams
-let address = params.get('j')
+let appName = 'universal-signal-swarm'
+let trackers = []
 
-let b = new Bugout(address || {seed: localStorage["bugout-server-seed"]})
-localStorage["bugout-server-seed"] = b.seed
-console.log(b.address())
-
-b.on("seen", function(addr) {
-    console.log("Peer connected: " + addr)
-    keys(customStore).then(keys => {
-        keys.forEach(item => {
-            get(item, customStore).then(val => {
-                let items = val[0]
-                let id = item
-                if(items.private === false){
-                    let message = {   
-                        id, 
-                        name: items.name, 
-                        content: items.content, 
-                        private: items.private, 
-                        created: items.created,
-                        modified: items.modified
-                    }
-                    b.send(addr, message)
-                }
-            })
-        })
+fetch('https://invited-subsequent-breeze.glitch.me/trackers')
+.then(res => res.json())
+.then(json => {
+    if(json.appName != appName){
+        appName = 'universal-signal-swarm'
+    }
+    let appId = uuidv5(appName, uuidv5.URL)
+    json.trackers.forEach(ans => {
+        let bytes = CryptoJS.AES.decrypt(ans.toString(), appId)
+        let tracker = bytes.toString(CryptoJS.enc.Utf8)
+        trackers.push(tracker)
     })
+    start(trackers)
+    //setInterval(()=>{bugout(trackers)}, 5000)
 })
 
-b.on("server", function(address) {
-    console.log("Connected to server")
-})
-b.on("message", function(address, message){
-    set(message.id,        
-        [{
-            name: message.name, 
-            content: message.content, 
-            private: message.secret, 
-            created: message.created, 
-            modified: message.modified
-        }], 
-        customStore)
-})
+function start(trackers){
 
-// Jot.ooo // Main application
-let id
-let legend = document.getElementById("title")
-let editor = document.getElementsByClassName("ql-editor")[0]
-let secret = document.getElementById("private")
-let search = document.getElementById("search")
+    // Bugout
+    let params = new URL(document.location).searchParams
+    let address = params.get('j')
 
-document.getElementById("new").addEventListener("click", () => {
-    id = null
-    newDoc()
-})
+    let b = new Bugout(address || {seed: localStorage["bugout-server-seed"], announce: trackers})
+    localStorage["bugout-server-seed"] = b.seed
+    console.log(b.address())
 
-function newDoc(){
-    id = generateId()
-    legend.textContent = "Untitled"
-    editor.innerHTML = ""
-    secret.checked = false
-    initialName = again //resets initialName function
-}
-
-function loadDoc(id){
-    id=id
-    let item = get(id, customStore).then(item => {
-        legend.textContent = item[0].name
-        editor.innerHTML = item[0].content
-        secret.checked = item[0].private
-    })
-    initialName = function(){}
-}
-
-legend.addEventListener('keyup', debounce( () => {
-    rename(id)
-},750))
-
-function rename(id){
-    id=id
-    let name = legend.textContent
-    let contents = editor.innerHTML
-    let checkbox = secret.checked
-    if(!id){
-        id = generateId()
-    }
-    if(!contents){
-        contents = " "
-    }
-    initialName = function(){}
-    save(id, name, contents, checkbox)
-}
-function shorten(text,max) {
-    return text && text.length > max ? text.slice(0,max).split(' ').slice(0, -1).join(' ') : text
-}
-
-//set initial name
-let initialName = function() { 
-    console.log("initialName")
-    let name = editor.textContent
-    if(name){
-        name = shorten(editor.textContent, 30)
-        legend.textContent = name
-    }
-    return name
-},again = initialName //stores initialName function
-
-//save changes
-editor.addEventListener('keyup', debounce( () => {
-    id=id
-    if(!id){
-        console.log("generating new id")
-        id = generateId
-    }
-    let name = initialName()
-    initialName = function(){} //disables initialName function
-    name = legend.textContent
-    let contents = editor.innerHTML
-    let checkbox = secret.checked
-    save(id, name, contents, checkbox)
-}, 1000))
-
-function save(id, name, contents, secret){
-    if(!id && !contents){
-        id=generateId()
-        console.log(id)
-        contents = " "
-    }
-    set(
-        id, 
-        [{
-            name: name, 
-            content: contents, 
-            private: secret, 
-            created: createdDate(), 
-            modified: Date()
-        }], 
-        customStore)
-}
-
-// Private 
-secret.addEventListener("click", () => {
-    if(!id){
-        id=generateId()
-    }
-    console.log(id)
-    get(id, customStore).then(val => {
-        if(val == null){
-            return
-        } else {
-            let name = val[0].name
-            let content = val[0].content
-            let checkbox = secret.checked
-            save(id, name, content, checkbox)
-        }
-    })
-})
-
-// Sync
-let syncOn = document.getElementById("sync")
-syncOn.addEventListener("click", () => {
-    let sync = document.location + "?j=" + b.address()
-    let qr = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data="+sync
-    let modalContent = document.getElementById("modal_content")
-    modalContent.innerHTML=""
-    let modal = document.getElementById('modal_title')
-    modal.textContent = "P2P Sync"
-    let results = document.createElement("div")
-    results.setAttribute("style","display: block")
-    results.innerHTML=`<h3>Sync your jots with another device</h3>
-                    <div style="display: block; font-size: .75em">(Jots marked "Private" will not be synced)</div>
-                    <h5>QR Code</h5>
-                    <img src="${qr}"/>
-                    <h5>URL</h5>
-                    <a href="${sync}" style="font-size: .75em">${sync}</a>
-    `
-    modalContent.append(results)
-    document.getElementById('modal_1').checked = true
-    
-})
-
-// Delete
-document.getElementById("delete").addEventListener("click", () => {
-    if(!id) return
-    del(id, customStore)
-    newDoc()
-})
-
-// Browse button & modal
-document.getElementById("browse").addEventListener("click", () => {
-    browse()
-})
-function browse(){
-    let modalContent = document.getElementById("modal_content")
-    modalContent.innerHTML=""
-    let files = keys(customStore).then(keys => {
-        if(keys.length===0){
-            let results = document.createElement("div")
-            results.setAttribute("style","display: block")
-            results.innerHTML=`<h3><i class="far fa-times-circle" style="color: darkred"></i> There's nothing here.</h3> 
-            <h4>Jot something down and check back later!</h4>`
-            modalContent.append(results)
-        }
-        keys.forEach(item => {
-            let name=get(item, customStore).then(val => {
-                let results = document.createElement("div")
-                results.addEventListener("click", () => {
-                    id=item
-                    loadDoc(item)
-                    document.getElementById('modal_1').checked = false
-                })
-                results.onmouseover = function(){
-                    results.style.cursor = "pointer";
-                }
-                results.setAttribute("style","display: block; font-weight:bold;")
-                results.innerHTML = `<i class="fas fa-file-alt" style="color: #208BA6"></i> ${val[0].name}`
-                modalContent.append(results)
-            })
-        })
-    })
-    let modal = document.getElementById('modal_title')
-    modal.textContent = "Browse"
-    document.getElementById('modal_1').checked = true
-}
-
-//Search and modal
-search.addEventListener("keyup", (e) => {
-    if(event.code == "Enter"){
-        searcher()
-    }
-})
-search.addEventListener("click", () => {
-    search.value = ""
-})
-let modal = document.getElementById('modal_title')
-let modalContent = document.getElementById("modal_content")
-function searcher(){
-    modalContent.innerHTML=""
-    let searchTerm = search.value
-    let found = false
-    searchTerm = searchTerm.toLowerCase()
-    let files = keys(customStore).then(keys => {
-        keys.forEach(item => {
-            let results = get(item, customStore).then(val => {
-                if(val[0].content){
-                    let find = val[0].content
-                    find = find.toLowerCase()
-                    let bool = find.includes(searchTerm, function(found){
-                        found = true
-                        return found
-                    })
-                    if(bool === true){
-                        //found = true
-                        results = document.createElement("div")
-                        results.addEventListener("click", () => {
-                            id=item
-                            loadDoc(item)
-                            document.getElementById('modal_1').checked = false
-                        })
-                        results.onmouseover = function(){
-                            results.style.cursor = "pointer";
+    b.on("seen", function(addr) {
+        console.log("Peer connected: " + addr)
+        keys(customStore).then(keys => {
+            keys.forEach(item => {
+                get(item, customStore).then(val => {
+                    let items = val[0]
+                    let id = item
+                    if(items.private === false){
+                        let message = {   
+                            id, 
+                            name: items.name, 
+                            content: items.content, 
+                            private: items.private, 
+                            created: items.created,
+                            modified: items.modified
                         }
-                        results.setAttribute("style","display: block; font-weight:bold;")
-                        results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585;"></i> ${val[0].name}`
-                        modalContent.append(results)
-                    } else if (found === false){
-                        let results = document.createElement("div")
-                        results.setAttribute("style","display: block; font-weight:bold;")
-                        results = `
-                            <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${searchTerm}'</h3>
-                        `
-                        modal.textContent = "Search"
-                        modalContent.innerHTML=results
+                        b.send(addr, message)
                     }
-                    
-                }
+                })
             })
         })
     })
-    modal.textContent = "Search"
-    document.getElementById('modal_1').checked = true
-    search.value = ""
-}
-// Get a created date
-let createdDate = once(function(){
-    return Date()
-})
-// Once function
-function once(fn, context) { 
-	let result;
-	return function() { 
-		if(fn) {
-			result = fn.apply(context || this, arguments);
-			fn = null;
-		}
-		return result;
-	};
-}
 
-// Process timing events
-function debounce(callback, wait) {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(function () { callback.apply(this, args) }, wait);
-    };
-}
+    b.on("server", function(address) {
+        console.log("Connected to server")
+    })
+    b.on("message", function(address, message){
+        set(message.id,        
+            [{
+                name: message.name, 
+                content: message.content, 
+                private: message.secret, 
+                created: message.created, 
+                modified: message.modified
+            }], 
+            customStore)
+    })
 
-//generate crypto hash
-function generateId (len) {
-    var arr = new Uint8Array((len || 40) / 2)
-    window.crypto.getRandomValues(arr)
-    return Array.from(arr, dec2hex).join('')
-}
-function dec2hex (dec) {
-    return ('0' + dec.toString(16)).substr(-2)
+    // Jot.ooo // Main application
+    let id
+    let legend = document.getElementById("title")
+    let editor = document.getElementsByClassName("ql-editor")[0]
+    let secret = document.getElementById("private")
+    let search = document.getElementById("search")
+
+    document.getElementById("new").addEventListener("click", () => {
+        id = null
+        newDoc()
+    })
+
+    function newDoc(){
+        id = generateId()
+        legend.textContent = "Untitled"
+        editor.innerHTML = ""
+        secret.checked = false
+        initialName = again //resets initialName function
+    }
+
+    function loadDoc(id){
+        id=id
+        let item = get(id, customStore).then(item => {
+            legend.textContent = item[0].name
+            editor.innerHTML = item[0].content
+            secret.checked = item[0].private
+        })
+        initialName = function(){}
+    }
+
+    legend.addEventListener('keyup', debounce( () => {
+        rename(id)
+    },750))
+
+    function rename(id){
+        id=id
+        let name = legend.textContent
+        let contents = editor.innerHTML
+        let checkbox = secret.checked
+        if(!id){
+            id = generateId()
+        }
+        if(!contents){
+            contents = " "
+        }
+        initialName = function(){}
+        save(id, name, contents, checkbox)
+    }
+    function shorten(text,max) {
+        return text && text.length > max ? text.slice(0,max).split(' ').slice(0, -1).join(' ') : text
+    }
+
+    //set initial name
+    let initialName = function() { 
+        console.log("initialName")
+        let name = editor.textContent
+        if(name){
+            name = shorten(editor.textContent, 30)
+            legend.textContent = name
+        }
+        return name
+    },again = initialName //stores initialName function
+
+    //save changes
+    editor.addEventListener('keyup', debounce( () => {
+        id=id
+        if(!id){
+            console.log("generating new id")
+            id = generateId
+        }
+        let name = initialName()
+        initialName = function(){} //disables initialName function
+        name = legend.textContent
+        let contents = editor.innerHTML
+        let checkbox = secret.checked
+        save(id, name, contents, checkbox)
+    }, 1000))
+
+    function save(id, name, contents, secret){
+        if(!id && !contents){
+            id=generateId()
+            console.log(id)
+            contents = " "
+        }
+        set(
+            id, 
+            [{
+                name: name, 
+                content: contents, 
+                private: secret, 
+                created: createdDate(), 
+                modified: Date()
+            }], 
+            customStore)
+    }
+
+    // Private 
+    secret.addEventListener("click", () => {
+        if(!id){
+            id=generateId()
+        }
+        console.log(id)
+        get(id, customStore).then(val => {
+            if(val == null){
+                return
+            } else {
+                let name = val[0].name
+                let content = val[0].content
+                let checkbox = secret.checked
+                save(id, name, content, checkbox)
+            }
+        })
+    })
+
+    // Sync
+    let syncOn = document.getElementById("sync")
+    syncOn.addEventListener("click", () => {
+        let sync = document.location + "?j=" + b.address()
+        let qr = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data="+sync
+        let modalContent = document.getElementById("modal_content")
+        modalContent.innerHTML=""
+        let modal = document.getElementById('modal_title')
+        modal.textContent = "P2P Sync"
+        let results = document.createElement("div")
+        results.setAttribute("style","display: block")
+        results.innerHTML=`<h3>Sync your jots with another device</h3>
+                        <div style="display: block; font-size: .75em">(Jots marked "Private" will not be synced)</div>
+                        <h5>QR Code</h5>
+                        <img src="${qr}"/>
+                        <h5>URL</h5>
+                        <a href="${sync}" style="font-size: .75em">${sync}</a>
+        `
+        modalContent.append(results)
+        document.getElementById('modal_1').checked = true
+        
+    })
+
+    // Delete
+    document.getElementById("delete").addEventListener("click", () => {
+        if(!id) return
+        del(id, customStore)
+        newDoc()
+    })
+
+    // Browse button & modal
+    document.getElementById("browse").addEventListener("click", () => {
+        browse()
+    })
+    function browse(){
+        let modalContent = document.getElementById("modal_content")
+        modalContent.innerHTML=""
+        let files = keys(customStore).then(keys => {
+            if(keys.length===0){
+                let results = document.createElement("div")
+                results.setAttribute("style","display: block")
+                results.innerHTML=`<h3><i class="far fa-times-circle" style="color: darkred"></i> There's nothing here.</h3> 
+                <h4>Jot something down and check back later!</h4>`
+                modalContent.append(results)
+            }
+            keys.forEach(item => {
+                let name=get(item, customStore).then(val => {
+                    let results = document.createElement("div")
+                    results.addEventListener("click", () => {
+                        id=item
+                        loadDoc(item)
+                        document.getElementById('modal_1').checked = false
+                    })
+                    results.onmouseover = function(){
+                        results.style.cursor = "pointer";
+                    }
+                    results.setAttribute("style","display: block; font-weight:bold;")
+                    results.innerHTML = `<i class="fas fa-file-alt" style="color: #208BA6"></i> ${val[0].name}`
+                    modalContent.append(results)
+                })
+            })
+        })
+        let modal = document.getElementById('modal_title')
+        modal.textContent = "Browse"
+        document.getElementById('modal_1').checked = true
+    }
+
+    //Search and modal
+    search.addEventListener("keyup", (e) => {
+        if(event.code == "Enter"){
+            searcher()
+        }
+    })
+    search.addEventListener("click", () => {
+        search.value = ""
+    })
+    let modal = document.getElementById('modal_title')
+    let modalContent = document.getElementById("modal_content")
+    function searcher(){
+        modalContent.innerHTML=""
+        let searchTerm = search.value
+        let found = false
+        searchTerm = searchTerm.toLowerCase()
+        let files = keys(customStore).then(keys => {
+            keys.forEach(item => {
+                let results = get(item, customStore).then(val => {
+                    if(val[0].content){
+                        let find = val[0].content
+                        find = find.toLowerCase()
+                        let bool = find.includes(searchTerm, function(found){
+                            found = true
+                            return found
+                        })
+                        if(bool === true){
+                            //found = true
+                            results = document.createElement("div")
+                            results.addEventListener("click", () => {
+                                id=item
+                                loadDoc(item)
+                                document.getElementById('modal_1').checked = false
+                            })
+                            results.onmouseover = function(){
+                                results.style.cursor = "pointer";
+                            }
+                            results.setAttribute("style","display: block; font-weight:bold;")
+                            results.innerHTML = `<i class="fas fa-file-alt" style="color: #788585;"></i> ${val[0].name}`
+                            modalContent.append(results)
+                        } else if (found === false){
+                            let results = document.createElement("div")
+                            results.setAttribute("style","display: block; font-weight:bold;")
+                            results = `
+                                <h3><i class="far fa-times-circle" style="color: darkred"></i> No results found for '${searchTerm}'</h3>
+                            `
+                            modal.textContent = "Search"
+                            modalContent.innerHTML=results
+                        }
+                        
+                    }
+                })
+            })
+        })
+        modal.textContent = "Search"
+        document.getElementById('modal_1').checked = true
+        search.value = ""
+    }
+    // Get a created date
+    let createdDate = once(function(){
+        return Date()
+    })
+    // Once function
+    function once(fn, context) { 
+        let result;
+        return function() { 
+            if(fn) {
+                result = fn.apply(context || this, arguments);
+                fn = null;
+            }
+            return result;
+        };
+    }
+
+    // Process timing events
+    function debounce(callback, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(function () { callback.apply(this, args) }, wait);
+        };
+    }
+
+    //generate crypto hash
+    function generateId (len) {
+        var arr = new Uint8Array((len || 40) / 2)
+        window.crypto.getRandomValues(arr)
+        return Array.from(arr, dec2hex).join('')
+    }
+    function dec2hex (dec) {
+        return ('0' + dec.toString(16)).substr(-2)
+    }
 }
 </script>
 </html>
