@@ -207,6 +207,14 @@ function start(trackers){
     localStorage["bugout-server-seed"] = b.seed
     console.log(b.address())
 
+    b.on("connections", connections => {
+        if(connections === 0){
+            console.log("Waiting for connections . . . ")
+        } else {
+            console.log("Connections: ", connections)
+        }
+    })
+
     b.on("seen", function(addr) {
         console.log("Peer connected: " + addr)
         keys(customStore).then(keys => {
