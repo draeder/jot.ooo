@@ -124,7 +124,7 @@ article {
         </label>
         <label class="button" id="delete"><i class="fas fa-trash"></i></label>
         <label class="button" id="browse"><i class="fas fa-folder-open"></i></label>
-        <label class="button" id="sync"><i class="fas fa-sync-alt"></i></label>
+        <label class="button" id="sync"><i class="fa fa-share-alt"></i></label>
 
     </section>
     <section>
@@ -181,7 +181,7 @@ let quill = new Quill('#editor', {
 let appName = 'universal-signal-swarm'
 let trackers = []
 
-fetch('https://tracker-swarm-node.herokuapp.com/trackers')
+fetch('https://wise-elated-lightning.glitch.me/trackers')
 .then(res => res.json())
 .then(json => {
     if(json.appName != appName){
@@ -199,12 +199,11 @@ fetch('https://tracker-swarm-node.herokuapp.com/trackers')
 .catch(err => console.log(err))
 
 function start(trackers){
-
     // Bugout
     let params = new URL(document.location).searchParams
     let address = params.get('j')
 
-    let b = new Bugout(address || {seed: localStorage["bugout-server-seed"], announce: trackers})
+    let b = new Bugout(address, {seed: localStorage["bugout-server-seed"], announce: trackers})
     localStorage["bugout-server-seed"] = b.seed
     console.log(b.address())
 
@@ -299,8 +298,7 @@ function start(trackers){
     }
 
     //set initial name
-    let initialName = function() { 
-        console.log("initialName")
+    let initialName = function() {
         let name = editor.textContent
         if(name){
             name = shorten(editor.textContent, 30)
@@ -313,8 +311,7 @@ function start(trackers){
     editor.addEventListener('keyup', debounce( () => {
         id=id
         if(!id){
-            console.log("generating new id")
-            id = generateId
+            id = generateId()
         }
         let name = initialName()
         initialName = function(){} //disables initialName function
@@ -327,7 +324,6 @@ function start(trackers){
     function save(id, name, contents, secret){
         if(!id && !contents){
             id=generateId()
-            console.log(id)
             contents = " "
         }
         set(
@@ -347,7 +343,6 @@ function start(trackers){
         if(!id){
             id=generateId()
         }
-        console.log(id)
         get(id, customStore).then(val => {
             if(val == null){
                 return
