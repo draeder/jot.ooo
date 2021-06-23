@@ -199,6 +199,7 @@ fetch('https://wise-elated-lightning.glitch.me/trackers')
 .catch(err => console.log(err))
 
 function start(trackers){
+    console.log(trackers)
     // Bugout
     let params = new URL(document.location).searchParams
     let address = params.get('j')
