@@ -203,7 +203,7 @@ function start(trackers){
     let params = new URL(document.location).searchParams
     let address = params.get('j')
 
-    let b = new Bugout(address, {seed: localStorage["bugout-server-seed"], announce: trackers})
+    let b = new Bugout(address, {announce: trackers} || {seed: localStorage["bugout-server-seed"], announce: trackers})
     localStorage["bugout-server-seed"] = b.seed
     console.log(b.address())
 
