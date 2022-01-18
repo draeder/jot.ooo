@@ -1,0 +1,44 @@
+.nowrap {
+    display: block;
+    white-space: nowrap;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.f-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.f-col-spacer-half {
+  width: 8px;
+  display: block;
+}
+
+.f-row-spacer-half {
+  height: 8px;
+  display: block;
+}
+
+.col-spacer {
+  width: 16px;
+  display: block;
+}
+
+.row-spacer {
+  height: 16px;
+  display: block;
+}
+
+.f-spacer {
+  flex-grow: 1;
+}
+
+.tab-spacer {
+    width: 36px;
+    height: 36px;
+}

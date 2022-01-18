@@ -32,8 +32,41 @@ $jotAngular12-theme: mat.define-light-theme((
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.all-component-themes($jotAngular12-theme);
-
+@import './assets/styles/custom-styles.scss';
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; padding: 0;}
+
+.jt-field {
+  .mat-form-field-wrapper {
+    padding-bottom: 0px;
+    margin: 0px;
+
+    .mat-form-field-flex {
+      .mat-form-field-infix {
+        padding: 6px 0;
+        border-top: 6px solid transparent;
+      }
+      .mat-form-field-suffix {
+        
+      }
+    }
+  }
+}
+
+.ml {
+  margin-left: 6px;
+}
+
+.mat-icon.jt-icon-lg {
+  font-size: 30px;
+}
+
+.mat-icon.jt-icon-md {
+  font-size: 24px;
+}
+
+.mat-icon.jt-icon-sm {
+  font-size: 21px;
+}
