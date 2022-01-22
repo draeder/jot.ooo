@@ -32,9 +32,13 @@
               "src/manifest.webmanifest"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/assets/plugins/highlightjs/hljs.css"
             ],
-            "scripts": [],
+            "scripts": [
+              "src/assets/plugins/quill/quill.js",
+              "src/assets/plugins/highlightjs/hljs.js"
+            ],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"
           },

@@ -1,0 +1,68 @@
+// foreground colors
+@mixin c-primary {
+    color: $blue-1200;
+}
+@mixin c-secondary {
+    color: $blue-600;
+}
+@mixin c-info {
+    color: $blue-1000;
+}
+@mixin c-success {
+    color: $greenishCyan-500;
+}
+@mixin c-warning {
+    color: $khaki-700;
+}
+@mixin c-danger {
+    color: $scarletRed-600;
+}
+
+// background colors
+@mixin bg-primary {
+    background-color: $blue-1200;
+}
+@mixin bg-secondary {
+    background-color: $blue-600;
+}
+@mixin bg-info {
+    background-color: $blue-1000;
+}
+@mixin bg-success {
+    background-color: $greenishCyan-500;
+}
+@mixin bg-warning {
+    background-color: $khaki-700;
+}
+@mixin bg-danger {
+    background-color: $scarletRed-600;
+}
+
+// text colors
+@mixin t-primary {
+    color: $blue-1200;
+}
+@mixin t-secondary {
+    color: $blue-600;
+}
+@mixin t-info {
+    color: $blue-1000;
+}
+@mixin t-success {
+    color: $greenishCyan-500;
+}
+@mixin t-warning {
+    color: $khaki-700;
+}
+@mixin t-danger {
+    color: $scarletRed-600;
+}
+
+// Content area related
+@mixin standardPadding {
+    padding: $spacing-base $spacing-large;
+}
+
+@mixin shadow {
+    box-shadow: $box-shadow;
+}

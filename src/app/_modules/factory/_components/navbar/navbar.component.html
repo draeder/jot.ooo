@@ -1,16 +1,15 @@
-<mat-toolbar>
-    <div class="f-row">
-        <h1 class="mat-h1">Jot.ooo</h1>
-    </div>
-    <div class="f-spacer"></div>
-    <div class="f-row">
-        <mat-form-field appearance="outline" class="jt-field">
-            <input type="text" matInput>
-            <mat-icon matSuffix class="jt-icon-md">search</mat-icon>
-        </mat-form-field>
-        <div class="f-col-spacer-half"></div>
-        <button mat-button class="f-row">
-            <span>Sign in</span>
-        </button>
+<mat-toolbar class="toolbar main">
+    <div class="f-row wrap w-100">
+        <div class="f-row">
+            <h1 class="mat-h1">Jot.ooo</h1>
+        </div>
+        <div class="f-spacer"></div>
+        <div class="f-row">
+            <app-search></app-search>
+            <div class="f-col-spacer-half"></div>
+            <button mat-button class="f-row">
+                <span>Sign in</span>
+            </button>
+        </div>
     </div>
 </mat-toolbar>
