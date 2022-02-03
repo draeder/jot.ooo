@@ -7,6 +7,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { QuillModule } from 'ngx-quill'
+import { HttpClientModule } from '@angular/common/http';
+import { ErrorInterceptor } from './_interceptors/error.interceptor';
 
 @NgModule({
   declarations: [
@@ -16,6 +18,7 @@ import { QuillModule } from 'ngx-quill'
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     QuillModule.forRoot(),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
@@ -24,7 +27,9 @@ import { QuillModule } from 'ngx-quill'
       registrationStrategy: 'registerWhenStable:30000'
     })
   ],
-  providers: [],
+  providers: [
+    ErrorInterceptor
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

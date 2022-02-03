@@ -1,0 +1,1 @@
+export const TRACKER_URL = 'https://wise-elated-lightning.glitch.me/trackers';
