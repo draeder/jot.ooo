@@ -1,0 +1,32 @@
+<app-form-wrapper>
+  <div class="f-apart standard-header" header>
+    <span class="title">Login</span>
+    <button class="close" (click)="close()" mat-button>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <form [formGroup]="loginForm" body>
+    <div class="f-col">
+      <mat-form-field appearance="fill">
+        <input
+          matInput
+          type="email"
+          placeholder="Enter your email"
+          formControlName="username"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <input
+          matInput
+          type="password"
+          placeholder="Enter your password"
+          formControlName="password"
+        />
+      </mat-form-field>
+    </div>
+  </form>
+  <div class="f-apart w-100" action>
+    <button mat-button>Register</button>
+    <button mat-button (click)="login(loginForm.value)" [disabled]="!loginForm.valid">Login</button>
+  </div>
+</app-form-wrapper>

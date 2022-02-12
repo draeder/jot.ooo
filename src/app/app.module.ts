@@ -9,6 +9,7 @@ import { environment } from '../environments/environment';
 import { QuillModule } from 'ngx-quill'
 import { HttpClientModule } from '@angular/common/http';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { ErrorInterceptor } from './_interceptors/error.interceptor';
     AppRoutingModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    MatDialogModule,
     QuillModule.forRoot(),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,

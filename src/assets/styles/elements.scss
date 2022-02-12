@@ -1,68 +1,72 @@
-// foreground colors
-@mixin c-primary {
-    color: $blue-1200;
-}
-@mixin c-secondary {
-    color: $blue-600;
-}
-@mixin c-info {
-    color: $blue-1000;
-}
-@mixin c-success {
-    color: $greenishCyan-500;
-}
-@mixin c-warning {
-    color: $khaki-700;
-}
-@mixin c-danger {
-    color: $scarletRed-600;
-}
-
 // background colors
 @mixin bg-primary {
-    background-color: $blue-1200;
+  background-color: $canvas;
 }
 @mixin bg-secondary {
-    background-color: $blue-600;
+  background-color: $canvas;
 }
-@mixin bg-info {
-    background-color: $blue-1000;
-}
-@mixin bg-success {
-    background-color: $greenishCyan-500;
-}
-@mixin bg-warning {
-    background-color: $khaki-700;
-}
-@mixin bg-danger {
-    background-color: $scarletRed-600;
-}
-
-// text colors
-@mixin t-primary {
-    color: $blue-1200;
-}
-@mixin t-secondary {
-    color: $blue-600;
-}
-@mixin t-info {
-    color: $blue-1000;
-}
-@mixin t-success {
-    color: $greenishCyan-500;
-}
-@mixin t-warning {
-    color: $khaki-700;
-}
-@mixin t-danger {
-    color: $scarletRed-600;
+@mixin bg-accent {
+  background-color: $accent;
 }
 
 // Content area related
 @mixin standardPadding {
-    padding: $spacing-base $spacing-large;
+  padding: $spacing-base $spacing-large;
 }
 
 @mixin shadow {
-    box-shadow: $box-shadow;
+  box-shadow: $box-shadow;
+}
+
+@mixin light-border {
+  border: 1px solid $border;
+}
+
+@mixin light-icon {
+  color: #646f79;
+}
+
+@mixin list-reset {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Combos
+@mixin combo-primary {
+  color: $text-primary;
+  background-color: $canvas;
+}
+@mixin combo-secondary {
+  color: $text-secondary;
+  background-color: $hover;
+}
+@mixin combo-accent {
+  color: $text-accent;
+  background-color: $accent;
+}
+@mixin combo-solid-accent {
+  color: $text-accent;
+  background-color: $accent;
+}
+@mixin combo-avatar-accent {
+  color: $text-accent;
+  background-color: $accent;
+}
+@mixin combo-avatar-primary {
+  color: $text-primary;
+  background-color: $border;
+  border: 1px solid $border;
+}
+
+@mixin icon-medium {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+@mixin standardToolbar {
+  padding: 0 12px;
+  height: 54px;
+  background-color: $canvas;
 }

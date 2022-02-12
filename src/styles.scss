@@ -35,8 +35,9 @@ $jotAngular12-theme: mat.define-light-theme(
 @include mat.all-component-themes($jotAngular12-theme);
 @import "./assets/styles/custom-styles.scss";
 @import "./assets/plugins/quill/quill.snow.css";
-@import "./assets/styles/colors.scss";
+@import "./assets/styles/colors-light.scss";
 @import "./assets/styles/sizing.scss";
+@import "./assets/styles/functions.scss";
 @import "./assets/styles/elements.scss";
 
 html,
@@ -47,6 +48,17 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   padding: 0;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.mat-toolbar-row, .mat-toolbar-single-row {
+  &.standard-toolbar {
+    @include standardToolbar;
+    border-bottom: 1px solid $border;
+  }
 }
 
 .jt-field {
@@ -82,7 +94,7 @@ body {
 }
 
 .bgw {
-  background-color: #fff;
+  @include bg-primary;
 }
 
 .w-100 {
@@ -90,26 +102,22 @@ body {
 }
 
 .search-wrapper {
-  background: #f0f0f0;
-  border-color: #f0f0f0;
-  border: 1px solid #e5e7eb;
-  padding: 5px 30px;
-  margin-right: 6px;
+  @include combo-secondary;
+  @include light-border;
+  padding: 4px 30px;
   position: relative;
   overflow: hidden;
   border-radius: 100px;
   cursor: pointer;
   display: block;
   margin-right: 6px;
-  margin-bottom: 6px;
-  color: #272d37;
+  color: $text-primary;
   line-height: 24px;
   float: left;
   position: relative;
 
   input {
-    background: #f0f0f0;
-    color: #606265;
+    @include combo-secondary;
     border: none;
     outline: 0;
     width: 100%;
@@ -141,15 +149,195 @@ body {
 }
 
 .toolbar {
-  background-color: #fff;
+  @include combo-primary;
   @include shadow;
- 
+
   &.main {
     min-height: 100px;
     padding: 6px 12px;
   }
   &.primary {
-    @include bg-success;
-    color: #fff;
+    @include combo-accent;
+  }
+}
+
+// Avatar
+app-avatar {
+  .jt-avatar {
+    position: relative;
+    user-select: none;
+
+    mat-card-header {
+      .mat-card-header-text {
+        margin: 0;
+      }
+
+      .mat-card-avatar {
+        @include combo-avatar-primary;
+        text-align: center;
+        overflow: hidden;
+        border-radius: 50%;
+        text-transform: uppercase;
+
+        &.jt-small {
+          width: $heading-size;
+          height: $heading-size;
+          font-size: $base-size;
+          line-height: $heading-size;
+
+          &.jt-grouped {
+            margin-left: 0;
+          }
+
+          &.jt-online {
+            &::before {
+              content: "";
+              border: 1px solid $canvas;
+              position: absolute;
+              height: 8px;
+              width: 8px;
+              border-radius: 50%;
+              bottom: 2px;
+              left: -2px;
+              background: $status-success;
+            }
+          }
+        }
+
+        &.jt-large {
+          width: 138px;
+          height: 138px;
+          font-size: 4.2rem;
+          line-height: 140px;
+
+          &.jt-online {
+            &::before {
+              content: "";
+              border: 1px solid $canvas;
+              position: absolute;
+              height: 14px;
+              width: 14px;
+              border-radius: 50%;
+              top: 114px;
+              left: 14px;
+              background: $status-success;
+              z-index: 1000;
+            }
+          }
+        }
+      }
+    }
+
+    .jt-avatar-control {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      border-radius: 50%;
+      background-color: $canvas;
+      box-shadow: $box-shadow;
+      color: $text-secondary;
+      cursor: pointer;
+
+      &.small {
+        display: none;
+      }
+
+      &.large {
+        left: 105px;
+        top: 110px;
+        width: 24px;
+        height: 24px;
+
+        .avatar-edit-icon {
+          font-size: 12px;
+          width: 12px;
+          height: 12px;
+          line-height: 12px;
+        }
+      }
+    }
+
+    .jt-avatar-online {
+      border: 1px solid $canvas;
+      position: absolute;
+      border-radius: 50%;
+      background: $status-success;
+      z-index: 1;
+
+      &.small {
+        height: 8px;
+        width: 8px;
+        top: $line-height;
+        left: 0;
+      }
+
+      &.large {
+        height: $base-size;
+        width: $base-size;
+        top: 116px;
+        left: 18px;
+      }
+    }
+  }
+}
+
+// Avatar Group start
+app-avatar-group {
+  .avatar-group {
+    app-avatar {
+      margin-right: -$padding-size/2;
+
+      .avatar {
+        mat-card-header {
+          .mat-card-avatar {
+            border: 1px solid $border;
+          }
+        }
+      }
+    }
+  }
+}
+
+.cdk-overlay-pane {
+  &.general-dialog-container {
+    .mat-dialog-container {
+      padding: 0;
+    }
+  }
+}
+
+.standard-header {
+  width: 100%;
+
+  .title {
+    @include leading;
+  }
+}
+
+.standard-body {
+  padding: 24px 60px;
+  min-height: 150px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.standard-action {
+  border-top: 1px solid $border;
+  @include standardToolbar;
+  display: flex;
+  align-items: center;
+}
+
+.mat-button.close {
+  padding: 0;
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
+
+  .mat-button-wrapper {
+    .mat-icon {
+     @include icon-medium;
+    }
   }
 }

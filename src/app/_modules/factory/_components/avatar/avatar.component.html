@@ -1,0 +1,22 @@
+<!-- Hidden input for avatar upload -->
+<input #uploadInput type="file" style="display: none;" accept="image/*" 
+       (change)="onAvatarUpload($event)" />
+<div class="jt-avatar">
+    <mat-card-header>
+        <ng-template [ngIf]="imgUrl" [ngIfElse]="noPicture">
+            <img [src]="imgUrl" alt="avatar" mat-card-avatar [ngClass]="classList" />
+        </ng-template>
+        <ng-template #noPicture>
+            <div mat-card-avatar [ngClass]="classList">
+                {{ initials }}
+            </div>
+        </ng-template>
+    </mat-card-header>
+    <span *ngIf="editable" 
+          ngClass="jt-avatar-control {{size}}"
+          (click)="onAvatarClick()">
+        <mat-icon fontSet="jt-icons" class="avatar-edit-icon">pencil</mat-icon>
+    </span>
+    <span *ngIf="online" ngClass="jt-avatar-online {{size}}">
+    </span>
+</div>

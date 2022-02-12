@@ -42,6 +42,20 @@
   flex-grow: 1;
 }
 
+.f-center {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.f-apart {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .tab-spacer {
     width: 36px;
     height: 36px;
