@@ -23,6 +23,7 @@ export class GunService {
   public gun: any;
   private sea: any;
   private user: any;
+  private entangler: any;
 
   constructor(private userService: UserService) {
     this.gun = GUN();
@@ -31,6 +32,7 @@ export class GunService {
     this.gun.on('auth', (ack: any) => {
       if(ack) {
         this.userService.auth$ = ack;
+        // this.entangler = this.gun.entangler(ack.sea);
       }
     });
   }
@@ -68,5 +70,11 @@ export class GunService {
     sessionStorage.clear();
     this.userService.auth$ = null;
     this.user = null;
+  }
+
+  public createQRimage() {
+    // this.entangler.QR.image().then((qr: any) => {
+    //   console.log(qr);
+    // })
   }
 }

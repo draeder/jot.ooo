@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
   styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements AfterViewInit {
-
+  editorInstance: any;
 
   @ViewChild('editorContainer') editorContainer: ElementRef;
   @ViewChild('toolbar') toolbar: ElementRef;
@@ -41,13 +41,17 @@ export class EditorComponent implements AfterViewInit {
       theme: 'snow'
     }
 
-    const instance = this.editorService.initiate(containerRef.nativeElement, options);
-    this.editorChange(instance);
+    this.editorInstance = this.editorService.initiate(containerRef.nativeElement, options);
+    this.editorChange(this.editorInstance);
   }
 
   editorChange(quill: any) {
     quill.on('selection-change', (delta: any, oldDelta: any, source: string) => {
       this.highlight();
     });
+  }
+
+  focusIn() {
+    this.editorInstance.focus();
   }
 }
