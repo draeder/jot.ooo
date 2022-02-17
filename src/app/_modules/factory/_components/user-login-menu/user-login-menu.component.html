@@ -1,7 +1,11 @@
-<app-avatar initials="SM" *ngIf="loggedIn; else loginButton"></app-avatar>
+<!-- <app-avatar initials="SM" ></app-avatar> -->
+
+<button mat-button color="warn" (click)="logout()" class="f-row" *ngIf="loggedIn; else loginButton">
+    <span>Logout</span>
+</button>
 
 <ng-template #loginButton>
-    <button mat-button class="f-row" (click)="openLoginMenu()">
+    <button mat-button class="f-row" (click)="login()">
         <span>Sign in</span>
     </button>
 </ng-template>

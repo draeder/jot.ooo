@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { GlobalDialogService } from 'src/app/_services/global-dialog.service';
-import { LoginFormComponent } from '../login-form/login-form.component';
+import { Component, Input } from '@angular/core';
+import { GunService } from 'src/app/_services/gun.service';
+import { UserService } from 'src/app/_services/user.service';
 
 @Component({
   selector: 'app-user-login-menu',
@@ -9,9 +9,19 @@ import { LoginFormComponent } from '../login-form/login-form.component';
 })
 export class UserLoginMenuComponent {
   loggedIn: boolean;
-  constructor(private dialogService: GlobalDialogService) { }
+  constructor(private gun: GunService, private userService: UserService) { 
+    this.userService.auth$.subscribe((auth: any) => {
+      this.loggedIn = !!auth;
+    });
+  }
 
-  openLoginMenu() {
-    const dialogRef = this.dialogService.openDialog(LoginFormComponent);
+  login() {
+    this.gun.createSeaPair().then((seaPair) => {
+      this.gun.loginWithSeaPair(seaPair);
+    });
+  }
+
+  logout() {
+    this.gun.logout();
   }
 }
