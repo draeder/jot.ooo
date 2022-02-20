@@ -4,6 +4,7 @@ import { GlobalDialogService } from '@services/global-dialog.service';
 import { GunService } from '@services/gun.service';
 import { UserService } from '@services/user.service';
 import FormField from 'src/app/_classes/form-field';
+import { environment } from 'src/environments/environment';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 export class EditorToolbar {
@@ -30,12 +31,6 @@ export class CardWrapperComponent extends FormField implements OnInit {
 
   ngOnInit(): void {
     this.initilizeEditor();
-    this.user.auth$.subscribe((auth: any) => {
-      if(auth) { console.log('Logged In'); }
-    })
-    this.gun.createSeaPair().then((seaPair) => {
-      this.gun.loginWithSeaPair(seaPair);
-    });
   }
 
   initilizeEditor() {

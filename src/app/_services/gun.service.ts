@@ -11,7 +11,7 @@ export interface LoginRequest {
   rememberMe?: boolean;
 }
 
-export interface SignUpRequest extends LoginRequest {}
+export interface SignUpRequest extends LoginRequest { }
 
 @Injectable({
   providedIn: 'root'
@@ -20,20 +20,28 @@ export class GunService {
   public gun: any;
   private sea: any;
   private user: any;
-  private entangler: any;
+  // private entangler: any;
+  // private auth: any;
 
   constructor(private userService: UserService) {
-    this.gun = new GUN({ peers: environment.peerUrls });
-    this.sea = GUN.SEA;
-    this.user = this.gun.user().recall({sessionStorage: true});
-    console.log(this.user);
-    
-    this.gun.on('auth', (ack: any) => {
-      if(ack) {
-        this.userService.auth$ = ack;
-        // this.entangler = this.gun.entangler(ack.sea);
-      }
-    });
+    this.gunOnReady();
+  }
+
+  public gunOnReady() {
+    return new Promise((resolve, reject) => {
+      this.gun = new GUN({ peers: environment.peerUrls });
+      this.sea = GUN.SEA;
+      this.user = this.gun.user().recall({ sessionStorage: true });
+      this.gun.on('auth', (ack: any) => {
+        if (ack) {
+          this.userService.auth$ = ack;
+          // this.entangler = this.gun.entangler(ack.sea);
+        } else {
+          reject(false);
+        }
+      });
+      resolve(true);
+    })
   }
 
   /**
@@ -71,27 +79,148 @@ export class GunService {
     this.user = null;
   }
 
-  public getCurrentPair(): Promise<IGunCryptoKeyPair> {
+  public getUserSeaPair(): Promise<IGunCryptoKeyPair | any> {
     return new Promise((resolve, reject) => {
-      this.gun.user().get('pair').then((pair: IGunCryptoKeyPair | any) => {
-        !!pair? resolve(pair) : reject(new Error('No pair found'));
+      let pair = sessionStorage.getItem('pair');
+      if(pair) {
+        pair = JSON.parse(pair);
+        resolve(pair)
+      } else {
+        reject(new Error('No pair found'));
+      }
+    })
+  }
+
+  public createQRimage() {
+    this.getUserSeaPair().then((pair) => {
+      console.log(pair);
+    });
+  }
+
+  public createPublicStore(storeName: string, data: any) {
+    this.user.get(storeName).put(data);
+  }
+
+  /**
+   * save data to gun store using a store name
+   * @param storeName store name
+   * @param data data to be saved
+   * @param key key to be saved
+   * @param customSeaPair custom sea pair if not using user's sea Pair
+   */
+  public createPrivateStore(storeName: string, key: string, data: any, customSeaPair?: IGunCryptoKeyPair) {
+    this.encryptData(data, customSeaPair).then((encryptedData: any) => {
+      this.user.get(storeName).put({[key]: encryptedData});
+    });
+  }
+
+  /**
+   * get sea encrypted data from gun store 
+   * @param storeName store name
+   * @param customSeaPair custom sea pair to decrypt or use the users sea pair
+   * @param key key to get
+   * @returns Promise decrypted data
+   */
+  public getPrivateStoreData(storeName: string, key: string, customSeaPair?: IGunCryptoKeyPair): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.user.get(storeName).get(key).once((data: any) => {
+        if(data) {
+          this.decryptData(data, customSeaPair).then((decryptedData: any) => {
+            resolve(decryptedData);
+          })
+        } else {
+          reject(new Error('No Data'));
+        }
       });
     })
   }
 
-  public getUserSeaPair() {
-    return this.user?.is || new Error('No user found');
+  public getPublicStoreData(storeName: string) {
+    return this.gun.get(storeName).val();
   }
 
-  public createQRimage() {
-    console.log(this.getUserSeaPair());
-    
-    // this.entangler.QR.image().then((qr: any) => {
-    //   console.log(qr);
-    // });
-    // this.getCurrentPair().then((pair: IGunCryptoKeyPair) => {
-    //   console.log(pair);
-    // });
-    
+  /**
+   * encrypt data with either the saved user sea pair or the custom pair
+   * @param data data to encrypt
+   * @param customSeaPair optional custom pair
+   * @returns Promise encrypted data
+   */
+  private encryptData(data: any, customSeaPair?: IGunCryptoKeyPair) {
+    return new Promise((resolve, reject) => {
+      if(customSeaPair) {
+        this.encrypt(data, customSeaPair).then((encryptedData) => {
+          resolve(encryptedData);
+        });
+      } else {
+        this.getUserSeaPair().then((pair) => {
+          this.encrypt(data, pair).then((encryptedData) => {
+            resolve(encryptedData);
+          });
+        });
+      }
+    })
+  }
+
+  /**
+   * decrypt data with either the saved user sea pair or the custom pair
+   * @param encryptedData encrypted data
+   * @param customSeaPair optional custom pair
+   * @returns Promise decrypted data
+   */
+  private decryptData(encryptedData: any, customSeaPair?: IGunCryptoKeyPair) {
+    return new Promise((resolve, reject) => {
+      if(customSeaPair && customSeaPair?.pub) {
+          this.decrypt(encryptedData, customSeaPair).then((data) => {
+            resolve(data);
+          });
+      } else {
+        this.getUserSeaPair().then((pair) => {        
+          this.decrypt(encryptedData, pair).then((data) => {
+            resolve(data);
+          });
+        })
+      }
+    })
+  }
+
+  /**
+   * decrypt data
+   * @param encryptedData data to be decrypted
+   * @param pair SEA pair
+   * @returns decrypted data
+   */
+  private decrypt(encryptedData: any, pair: IGunCryptoKeyPair) {
+    return new Promise((resolve, reject) => {
+      this.sea.verify(encryptedData, pair.pub).then((verifiedData: any) => {
+        this.sea.decrypt(verifiedData, pair).then((decrypted: any) => {
+          resolve(decrypted);
+        }).catch((error: any) => {
+          console.error('Error decrypting data', error);
+          reject(error);
+        });
+      }).catch((error: any) => {
+        console.error('Error decrypting data', error);
+        reject(error);
+      });
+    })
+  }
+
+  /**
+   * encrypt data
+   * @param data data to be encrypted
+   * @param pair SEA pair
+   * @returns encrypted data
+   */
+  private encrypt(data: any, pair: IGunCryptoKeyPair) {
+    return new Promise((resolve, reject) => {
+      this.sea.encrypt(data, pair).then((encrypted: any) => {
+        this.sea.sign(encrypted, pair).then((encryptedAndSignedData: any) => {
+          resolve(encryptedAndSignedData);
+        });
+      }).catch((error: any) => { 
+        console.error('Error encrypting data', error);
+        reject(error);
+      });
+    })
   }
 }

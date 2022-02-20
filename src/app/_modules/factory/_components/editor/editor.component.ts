@@ -65,7 +65,6 @@ export class EditorComponent extends FormField implements AfterViewInit {
   }
 
   writeValue(editorContent: any): void {
-    console.log('editorContent', editorContent);
       if(!editorContent) {
         this.editorInstance?.setContents([]);
         return;
