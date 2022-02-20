@@ -9,7 +9,7 @@
             <mat-slide-toggle color="primary" formControlName="private">
                 <span class="base-text">Make Private</span>
             </mat-slide-toggle>
-            <button mat-icon-button>
+            <button mat-icon-button (click)="delete()">
                 <i class="fa fa-trash"></i>
             </button>
             <button mat-icon-button>
@@ -20,7 +20,7 @@
             </button>
         </mat-toolbar>
 
-        <div class="title-container brb" [ngClass]="{'form-error': !editorToolbarForm.controls?.title?.valid && editorToolbarForm.controls?.title?.touched}">
+        <div class="title-container" [ngClass]="{'form-error': !editorToolbarForm.controls?.title?.valid && editorToolbarForm.controls?.title?.touched}">
             <input type="text" placeholder="Enter a title" formControlName="title"/>
         </div>
 

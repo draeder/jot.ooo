@@ -14,6 +14,11 @@
   padding: $spacing-base $spacing-large;
 }
 
+// For container with less content
+@mixin largePadding {
+  padding: $spacing-large;
+}
+
 @mixin shadow {
   box-shadow: $box-shadow;
 }

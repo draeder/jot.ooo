@@ -11,6 +11,7 @@ import { AvatarComponent } from './_components/avatar/avatar.component';
 import { LoginFormComponent } from './_components/login-form/login-form.component';
 import { FormWrapperComponent } from './_components/form-wrapper/form-wrapper.component';
 import { SharedModule } from '../shared/shared.module';
+import { ConfirmationDialogComponent } from './_components/confirmation-dialog/confirmation-dialog.component';
 
 
 const EXPORTABLE_COMPONENTS = [
@@ -28,6 +29,7 @@ const EXPORTABLE_COMPONENTS = [
 @NgModule({
   declarations: [
     ...EXPORTABLE_COMPONENTS,
+    ConfirmationDialogComponent,
   ],
   imports: [
     CommonModule,

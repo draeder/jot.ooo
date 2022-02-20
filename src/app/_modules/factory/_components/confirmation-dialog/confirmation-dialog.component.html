@@ -1,0 +1,28 @@
+<div class="container-wrapper-lg f-col">
+  <div class="title f-apart">
+    <h2 mat-dialog-title>{{ dialogData?.title }}</h2>
+    <button mat-button class="close">
+        <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="message-container">
+    <mat-icon 
+      [style.fontSize.px]="dialogData?.iconSize"
+      [style.width.px]="dialogData?.iconSize"
+      [style.height.px]="dialogData?.iconSize"
+      [fontSet]="dialogData.iconFont"
+      [style.color]="dialogData.iconColor"
+      >{{dialogData?.icon}}</mat-icon>
+    <div class="message">
+      <p>{{ dialogData?.message }}</p>
+    </div>
+  </div>
+  <div class="action f-apart">
+    <button mat-button [color]="dialogData?.cancelButtonColor" (click)="close()">
+      {{ dialogData?.cancelButtonText }}
+    </button>
+    <button mat-raised-button [color]="dialogData?.confirmButtonColor" (click)="close(true)">
+      {{ dialogData?.confirmButtonText }}
+    </button>
+  </div>
+</div>

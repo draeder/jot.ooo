@@ -1,0 +1,13 @@
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100px;
+
+    .message {
+        padding: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}

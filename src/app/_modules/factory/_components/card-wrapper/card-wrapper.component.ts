@@ -1,8 +1,10 @@
 import { Component, forwardRef, OnInit } from '@angular/core';
 import { FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { GlobalDialogService } from '@services/global-dialog.service';
 import { GunService } from '@services/gun.service';
 import { UserService } from '@services/user.service';
 import FormField from 'src/app/_classes/form-field';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 export class EditorToolbar {
   title: '';
@@ -24,7 +26,7 @@ export class EditorToolbar {
 export class CardWrapperComponent extends FormField implements OnInit {
 
   editorToolbarForm: FormGroup;
-  constructor(private gun: GunService, private user: UserService) { super(); }
+  constructor(private gun: GunService, private user: UserService, private dialogService: GlobalDialogService) { super(); }
 
   ngOnInit(): void {
     this.initilizeEditor();
@@ -51,5 +53,21 @@ export class CardWrapperComponent extends FormField implements OnInit {
 
   share() {
     this.gun.createQRimage();
+  }
+
+  delete() {
+    const dialogRef = this.dialogService.openDialog(ConfirmationDialogComponent, {
+      data: {
+        title: 'Confirmation',
+        message: 'Are you sure you want to delete this item?',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'Cancel',
+        iconColor: '#fcd33f'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirm: boolean) => {
+      console.log(confirm);
+    })
   }
 }

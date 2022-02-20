@@ -26,6 +26,8 @@ export class GunService {
     this.gun = new GUN({ peers: environment.peerUrls });
     this.sea = GUN.SEA;
     this.user = this.gun.user().recall({sessionStorage: true});
+    console.log(this.user);
+    
     this.gun.on('auth', (ack: any) => {
       if(ack) {
         this.userService.auth$ = ack;
@@ -77,7 +79,13 @@ export class GunService {
     })
   }
 
+  public getUserSeaPair() {
+    return this.user?.is || new Error('No user found');
+  }
+
   public createQRimage() {
+    console.log(this.getUserSeaPair());
+    
     // this.entangler.QR.image().then((qr: any) => {
     //   console.log(qr);
     // });
