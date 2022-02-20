@@ -1,3 +1,6 @@
 export const environment = {
-  production: true
+  production: true,
+  peerUrls: [
+    'https://relay.peer.ooo/gun',
+  ] 
 };

@@ -70,3 +70,7 @@
   height: 54px;
   background-color: $canvas;
 }
+
+@mixin errorField {
+  border-color: $status-error;
+}

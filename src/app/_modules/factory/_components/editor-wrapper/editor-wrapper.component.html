@@ -1,0 +1,8 @@
+<form [formGroup]="editorForm">
+    <app-card-wrapper formControlName="metadata">
+        <div class="editor-wrapper">
+            <app-editor [(ngModel)]="editorContent" (ngModelChange)="updateContent($event)" [ngModelOptions]="{standalone: true}"></app-editor>
+        </div>
+    </app-card-wrapper>
+</form>
+

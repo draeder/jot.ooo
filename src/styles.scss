@@ -55,6 +55,23 @@ body {
   width: 100%;
 }
 
+.brt {
+  border-top: 1px solid $border;
+}
+.brr {
+  border-right: 1px solid $border;
+}
+.brb {
+  border-bottom: 1px solid $border;
+}
+.brl {
+  border-left: 1px solid $border;
+}
+
+.form-error {
+  @include errorField;
+}
+
 .mat-toolbar-row, .mat-toolbar-single-row {
   &.standard-toolbar {
     @include standardToolbar;
@@ -91,6 +108,7 @@ body {
 
 // Custom styling for components
 .quill-outer-wrapper {
+  background-color: #eafbf9;
   @include standardPadding;
 }
 

@@ -3,16 +3,13 @@ import { IGunCryptoKeyPair } from 'gun/types/types';
 import { UserService } from './user.service';
 import * as GUN from 'gun/gun';
 import 'gun/sea';
+import { environment } from 'src/environments/environment';
 
 export interface LoginRequest {
   username: string;
   password: string;
   rememberMe?: boolean;
 }
-
-const PEERS = [
-  'http://localhost:3000/gun',
-]
 
 export interface SignUpRequest extends LoginRequest {}
 
@@ -26,7 +23,7 @@ export class GunService {
   private entangler: any;
 
   constructor(private userService: UserService) {
-    this.gun = GUN();
+    this.gun = new GUN({ peers: environment.peerUrls });
     this.sea = GUN.SEA;
     this.user = this.gun.user().recall({sessionStorage: true});
     this.gun.on('auth', (ack: any) => {
@@ -50,7 +47,7 @@ export class GunService {
       } catch (error) {
         reject(error);
       }
-    })
+    });
   }
 
   /**
@@ -72,9 +69,21 @@ export class GunService {
     this.user = null;
   }
 
+  public getCurrentPair(): Promise<IGunCryptoKeyPair> {
+    return new Promise((resolve, reject) => {
+      this.gun.user().get('pair').then((pair: IGunCryptoKeyPair | any) => {
+        !!pair? resolve(pair) : reject(new Error('No pair found'));
+      });
+    })
+  }
+
   public createQRimage() {
     // this.entangler.QR.image().then((qr: any) => {
     //   console.log(qr);
-    // })
+    // });
+    // this.getCurrentPair().then((pair: IGunCryptoKeyPair) => {
+    //   console.log(pair);
+    // });
+    
   }
 }

@@ -1,0 +1,29 @@
+<form [formGroup]="editorToolbarForm">
+    <mat-card class="card-wrapper">
+
+        <mat-toolbar class="toolbar primary">
+            <button mat-button>
+                <i class="fa fa-add"></i>
+            </button>
+            <div class="f-spacer"></div>
+            <mat-slide-toggle color="primary" formControlName="private">
+                <span class="base-text">Make Private</span>
+            </mat-slide-toggle>
+            <button mat-icon-button>
+                <i class="fa fa-trash"></i>
+            </button>
+            <button mat-icon-button>
+                <i class="fa fa-folder"></i>
+            </button>
+            <button mat-icon-button (click)="share()">
+                <i class="fa fa-share-alt"></i>
+            </button>
+        </mat-toolbar>
+
+        <div class="title-container brb" [ngClass]="{'form-error': !editorToolbarForm.controls?.title?.valid && editorToolbarForm.controls?.title?.touched}">
+            <input type="text" placeholder="Enter a title" formControlName="title"/>
+        </div>
+
+        <ng-content></ng-content>
+    </mat-card>
+</form>
