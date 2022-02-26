@@ -5,7 +5,8 @@ import { UserService } from '@services/user.service';
 import { environment } from 'src/environments/environment';
 import { EditorToolbar } from '../card-wrapper/card-wrapper.component';
 import { debounceTime, tap } from 'rxjs/operators';
-import { BehaviorSubject } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { get } from 'lodash';
 
 export enum LoadingStatus {
   LOADING = 'loading',
@@ -23,48 +24,34 @@ export class EditorWrapperComponent implements OnInit {
   editorContent: any;
   componentName = 'editorWrapperComponent';
   contentSaveStatus: LoadingStatus | null;
-  constructor(private gun: GunService, private user: UserService) {
-    // After Gun ready
-    this.gun.gunOnReady().then(() => {
-      // Subscribe to user's auth state
-      this.user.auth$
-        .subscribe((auth: any) => {
-          if (auth) {
-            // After user is logged in
-            console.log('Logged In');
-            if(this.editorForm) { this.editorForm.enable(); }
-            // Check if store has data
-            this.gun.getPrivateStoreData(environment.defaultStoreName, this.componentName)
-              .then((data) => {
-                if (data) {
-                  // Populate the editor with data
-                  this.editorContent = data?.content;
-                  // Fill the form data
-                  this.editorForm?.patchValue(data);
-                }
-              }).catch(() => {
-                console.log('NO DATA IN STORE...');
-              });
-          } else {
-            if(this.editorForm) { this.editorForm.disable(); }
-          }
-        });
-    });
-  }
+  constructor(private gun: GunService, private user: UserService, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
+    // Subscribe to user's auth state
+    this.user.auth$
+      .subscribe((auth: any) => {
+        if (!!auth) {
+          // After user is logged in
+          console.log('Logged In, trying to fetch saved data');
+          this.gun.getPrivateStoreData(environment.defaultStoreName, this.componentName)
+            .then((data) => {
+              console.log('Data found', data);
+            }).catch((err) => {
+              console.log('data not found', err);
+            });
+        } else {
+          if (this.editorForm) { this.editorForm.disable(); }
+        }
+      });
     this.initiateEditor();
-
-    // Login with Sear Pair
-    this.gun.createSeaPair().then((seaPair) => {
-      this.gun.loginWithSeaPair(seaPair);
-    });
   }
 
-  initiateEditor() {
+  initiateEditor(initialData?: any) {
+    console.log('INITIATING EDITOR...', initialData);
+    const { metadata, content } = initialData || {};
     this.editorForm = new FormGroup({
-      metadata: new FormControl({value: new EditorToolbar()}),
-      content: new FormControl({ value: ''}),
+      metadata: new FormControl({ value: metadata || new EditorToolbar() }),
+      content: new FormControl({ value: content || '' }),
     });
 
     this.editorForm.valueChanges
@@ -95,4 +82,18 @@ export class EditorWrapperComponent implements OnInit {
       })
     }
   }
+
+  // saveData() {
+  //   if (this.editorForm.value && this.editorForm.valid && !this.editorForm.pristine) {
+  //     this.contentSaveStatus = LoadingStatus.LOADING;
+  //     this.gun.createPrivateStore(environment.defaultStoreName, this.componentName, this.editorForm.value).then(() => {
+  //       this.contentSaveStatus = LoadingStatus.SUCCESS;
+  //     }).catch(() => {
+  //       this.contentSaveStatus = LoadingStatus.ERROR;
+  //     });
+  //   } else {
+  //     this.contentSaveStatus = null;
+  //     console.log('INVALID FORM');
+  //   }
+  // }
 }

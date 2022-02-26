@@ -24,16 +24,21 @@ export class GunService {
   // private auth: any;
 
   constructor(private userService: UserService) {
-    this.gunOnReady();
+    this.gunOnReady().then(() => {
+      // Login with Sear Pair
+      this.createSeaPair().then((seaPair) => {
+        this.loginWithSeaPair(seaPair);
+      });
+    });
   }
 
   public gunOnReady() {
     return new Promise((resolve, reject) => {
-      this.gun = new GUN({ peers: environment.peerUrls });
+      this.gun = new GUN({ peers: environment.peerUrls, localStorage: true });
       this.sea = GUN.SEA;
       this.user = this.gun.user().recall({ sessionStorage: true });
       this.gun.on('auth', (ack: any) => {
-        if (ack) {
+        if (ack) {         
           this.userService.auth$ = ack;
           // this.entangler = this.gun.entangler(ack.sea);
         } else {
@@ -112,8 +117,10 @@ export class GunService {
     return new Promise((resolve, reject) => {
       this.encryptData(data, customSeaPair).then((encryptedData: any) => {
         try {
-          this.user.get(storeName).put({[key]: encryptedData});
-          resolve(true);
+          const data = this.user.get(`${storeName}`).put({[key]: encryptedData});
+          this.user.get(`${storeName}`).set(data).then((stored: any) => {
+            resolve(!!stored);
+          });
         } catch (error) {
           reject(error);
         }
@@ -130,14 +137,15 @@ export class GunService {
    */
   public getPrivateStoreData(storeName: string, key: string, customSeaPair?: IGunCryptoKeyPair): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.user.get(storeName).get(key).once((data: any) => {
-        if(data) {
-          this.decryptData(data, customSeaPair).then((decryptedData: any) => {
-            resolve(decryptedData);
-          }).catch(() => { reject(new Error('Error while data decryption')) });
-        } else {
-          reject(false);
+      this.user.get(`${storeName}`).get(key).once((data: any) => {
+        if(!data) {
+          reject(new Error(`No data found with key [${key}] in store [${storeName}]`));
+          return;
         }
+        this.decryptData(data, customSeaPair).then((decryptedData: any) => {
+          console.log('decrypted: ', data);
+          resolve(decryptedData);
+        }).catch(() => { reject(new Error(!data? 'No data to decrypt':  'Error while data decryption')) });
       });
     })
   }
@@ -176,15 +184,16 @@ export class GunService {
    */
   private decryptData(encryptedData: any, customSeaPair?: IGunCryptoKeyPair) {
     return new Promise((resolve, reject) => {
+      if(!encryptedData) { reject(null); return; }
       if(customSeaPair && customSeaPair?.pub) {
           this.decrypt(encryptedData, customSeaPair).then((data) => {
             resolve(data);
-          });
+          }).catch((error) => { reject(error) });
       } else {
-        this.getUserSeaPair().then((pair) => {        
+        this.getUserSeaPair().then((pair) => {
           this.decrypt(encryptedData, pair).then((data) => {
             resolve(data);
-          });
+          }).catch((error) => { reject(error) });
         })
       }
     })
@@ -198,6 +207,7 @@ export class GunService {
    */
   private decrypt(encryptedData: any, pair: IGunCryptoKeyPair) {
     return new Promise((resolve, reject) => {
+      if(!encryptedData || !pair?.pub) { reject(null); return; }
       this.sea.verify(encryptedData, pair.pub).then((verifiedData: any) => {
         this.sea.decrypt(verifiedData, pair).then((decrypted: any) => {
           resolve(decrypted);
