@@ -1,0 +1,10 @@
+.card-status-bar {
+    bottom: 0;
+    height: 30px;
+    display: flex;
+    padding: 0 12px;
+    position: sticky;
+    align-items: center;
+    width: calc(100% - 24px);
+    justify-content: flex-end;
+}

@@ -1,7 +1,13 @@
 <form [formGroup]="editorForm">
-    <app-card-wrapper formControlName="metadata">
+    <app-card-wrapper formControlName="metadata" [disabled]="editorForm?.disabled || false">
         <div class="editor-wrapper">
-            <app-editor [(ngModel)]="editorContent" (ngModelChange)="updateContent($event)" [ngModelOptions]="{standalone: true}"></app-editor>
+            <app-editor [disabled]="editorForm?.disabled || false" [(ngModel)]="editorContent" (ngModelChange)="updateContent($event)" [ngModelOptions]="{standalone: true}"></app-editor>
+        </div>
+
+        <div class="card-status-bar text-secondary">
+            <p class="xsmall" *ngIf="contentSaveStatus === 'loading'">Saving...</p>
+            <p class="xsmall" *ngIf="contentSaveStatus === 'success'">Saved</p>
+            <p class="xsmall" *ngIf="contentSaveStatus === 'error'">Error while saving</p>
         </div>
     </app-card-wrapper>
 </form>

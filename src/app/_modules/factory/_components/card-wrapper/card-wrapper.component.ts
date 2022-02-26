@@ -1,10 +1,8 @@
-import { Component, forwardRef, OnInit } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { GlobalDialogService } from '@services/global-dialog.service';
 import { GunService } from '@services/gun.service';
-import { UserService } from '@services/user.service';
 import FormField from 'src/app/_classes/form-field';
-import { environment } from 'src/environments/environment';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 export class EditorToolbar {
@@ -24,10 +22,11 @@ export class EditorToolbar {
     }
   ]
 })
-export class CardWrapperComponent extends FormField implements OnInit {
+export class CardWrapperComponent extends FormField implements OnInit, OnChanges {
 
   editorToolbarForm: FormGroup;
-  constructor(private gun: GunService, private user: UserService, private dialogService: GlobalDialogService) { super(); }
+  @Input() disabled: boolean;
+  constructor(private gun: GunService, private dialogService: GlobalDialogService) { super(); }
 
   ngOnInit(): void {
     this.initilizeEditor();
@@ -35,8 +34,8 @@ export class CardWrapperComponent extends FormField implements OnInit {
 
   initilizeEditor() {
     this.editorToolbarForm = new FormGroup({
-      title: new FormControl('', [Validators.required]),
-      private: new FormControl(true),
+      title: new FormControl({value: '', disabled: this.disabled}, [Validators.required]),
+      private: new FormControl({value: true, disabled: this.disabled}),
     });
 
     this.editorToolbarForm.valueChanges.subscribe((value: EditorToolbar) => this.onChange(value));
@@ -64,5 +63,16 @@ export class CardWrapperComponent extends FormField implements OnInit {
     dialogRef.afterClosed().subscribe((confirm: boolean) => {
       console.log(confirm);
     })
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.disabled !== undefined) {
+      this.disabled = changes.disabled.currentValue;
+      if(this.disabled) {
+        this.editorToolbarForm?.disable();
+      } else {
+        this.editorToolbarForm?.enable();
+      }
+    }
   }
 }

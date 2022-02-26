@@ -4,7 +4,14 @@ import { GunService } from '@services/gun.service';
 import { UserService } from '@services/user.service';
 import { environment } from 'src/environments/environment';
 import { EditorToolbar } from '../card-wrapper/card-wrapper.component';
-import { take } from 'rxjs/operators';
+import { debounceTime, tap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
+
+export enum LoadingStatus {
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
 
 @Component({
   selector: 'app-editor-wrapper',
@@ -14,6 +21,8 @@ import { take } from 'rxjs/operators';
 export class EditorWrapperComponent implements OnInit {
   editorForm: FormGroup;
   editorContent: any;
+  componentName = 'editorWrapperComponent';
+  contentSaveStatus: LoadingStatus | null;
   constructor(private gun: GunService, private user: UserService) {
     // After Gun ready
     this.gun.gunOnReady().then(() => {
@@ -23,40 +32,57 @@ export class EditorWrapperComponent implements OnInit {
           if (auth) {
             // After user is logged in
             console.log('Logged In');
+            if(this.editorForm) { this.editorForm.enable(); }
+            // Check if store has data
+            this.gun.getPrivateStoreData(environment.defaultStoreName, this.componentName)
+              .then((data) => {
+                if (data) {
+                  // Populate the editor with data
+                  this.editorContent = data?.content;
+                  // Fill the form data
+                  this.editorForm?.patchValue(data);
+                }
+              }).catch(() => {
+                console.log('NO DATA IN STORE...');
+              });
+          } else {
+            if(this.editorForm) { this.editorForm.disable(); }
           }
         });
     });
   }
 
   ngOnInit(): void {
+    this.initiateEditor();
+
     // Login with Sear Pair
     this.gun.createSeaPair().then((seaPair) => {
       this.gun.loginWithSeaPair(seaPair);
-    });
-
-    this.initiateEditor();
-    // Check if store has data
-    this.gun.getPrivateStoreData(environment.defaultStoreName, 'formData').then((data) => {
-      if(data) {
-        console.log('----', data);
-        
-        this.editorContent = data?.content;
-        this.editorForm.patchValue(data);
-      }
     });
   }
 
   initiateEditor() {
     this.editorForm = new FormGroup({
-      metadata: new FormControl(new EditorToolbar()),
-      content: new FormControl(''),
+      metadata: new FormControl({value: new EditorToolbar()}),
+      content: new FormControl({ value: ''}),
     });
 
-    this.editorForm.valueChanges.subscribe((value: any) => {
-      if (value) {
-        this.gun.createPrivateStore(environment.defaultStoreName, 'formData', value);
-      }
-    });
+    this.editorForm.valueChanges
+      .pipe(
+        tap((value: any) => { if (value) { this.contentSaveStatus = LoadingStatus.LOADING; } }),
+        debounceTime(1000) // 1 second delay
+      )
+      .subscribe((value: any) => {
+        if (value && value.metadata && value.content) {
+          this.gun.createPrivateStore(environment.defaultStoreName, this.componentName, value).then(() => {
+            this.contentSaveStatus = LoadingStatus.SUCCESS;
+          }).catch(() => {
+            this.contentSaveStatus = LoadingStatus.ERROR;
+          });
+        } else {
+          this.contentSaveStatus = null;
+        }
+      });
   }
 
   updateContent(content: any, metadata?: EditorToolbar | null) {

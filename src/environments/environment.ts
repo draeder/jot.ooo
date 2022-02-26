@@ -6,7 +6,6 @@ export const environment = {
   production: false,
   peerUrls: [
     'http://localhost:3000/gun',
-    'https://relay.peer.ooo/gun',
   ],
   defaultStoreName: 'gunStore'
 };
