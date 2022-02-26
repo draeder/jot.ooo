@@ -23,6 +23,12 @@ $modal-header: 36px !default;
 $options-height: 48px !default;
 $time-input-width: 63px !default;
 
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 // text sizes
 @mixin display {
   font-size: 42px;
