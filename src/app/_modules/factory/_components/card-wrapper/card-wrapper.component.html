@@ -2,20 +2,20 @@
     <mat-card class="card-wrapper">
 
         <mat-toolbar class="toolbar primary">
-            <button mat-button [disabled]="disabled">
+            <button mat-button>
                 <i class="fa fa-add"></i>
             </button>
             <div class="f-spacer"></div>
             <mat-slide-toggle color="primary" formControlName="private">
                 <span class="base-text">Make Private</span>
             </mat-slide-toggle>
-            <button mat-icon-button (click)="delete()" [disabled]="disabled">
+            <button mat-icon-button (click)="delete()">
                 <i class="fa fa-trash"></i>
             </button>
-            <button mat-icon-button [disabled]="disabled">
+            <button mat-icon-button>
                 <i class="fa fa-folder"></i>
             </button>
-            <button mat-icon-button (click)="share()" [disabled]="disabled">
+            <button mat-icon-button (click)="share()">
                 <i class="fa fa-share-alt"></i>
             </button>
         </mat-toolbar>

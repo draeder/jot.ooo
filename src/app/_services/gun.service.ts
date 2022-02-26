@@ -98,7 +98,7 @@ export class GunService {
   }
 
   public createPublicStore(storeName: string, data: any) {
-    this.gun.get(storeName).put(data);
+    this.user.get(storeName).put(data);
   }
 
   /**
@@ -109,15 +109,8 @@ export class GunService {
    * @param customSeaPair custom sea pair if not using user's sea Pair
    */
   public createPrivateStore(storeName: string, key: string, data: any, customSeaPair?: IGunCryptoKeyPair) {
-    return new Promise((resolve, reject) => {
-      this.encryptData(data, customSeaPair).then((encryptedData: any) => {
-        try {
-          this.user.get(storeName).put({[key]: encryptedData});
-          resolve(true);
-        } catch (error) {
-          reject(error);
-        }
-      }).catch((err) => { reject(err) });
+    this.encryptData(data, customSeaPair).then((encryptedData: any) => {
+      this.user.get(storeName).put({[key]: encryptedData});
     });
   }
 
@@ -134,9 +127,9 @@ export class GunService {
         if(data) {
           this.decryptData(data, customSeaPair).then((decryptedData: any) => {
             resolve(decryptedData);
-          }).catch(() => { reject(new Error('Error while data decryption')) });
+          })
         } else {
-          reject(false);
+          reject(new Error('No Data'));
         }
       });
     })
@@ -157,12 +150,12 @@ export class GunService {
       if(customSeaPair) {
         this.encrypt(data, customSeaPair).then((encryptedData) => {
           resolve(encryptedData);
-        }).catch((error) => { reject(error) });
+        });
       } else {
         this.getUserSeaPair().then((pair) => {
           this.encrypt(data, pair).then((encryptedData) => {
             resolve(encryptedData);
-          }).catch((error) => { reject(error) });
+          });
         });
       }
     })

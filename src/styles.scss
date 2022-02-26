@@ -34,12 +34,12 @@ $jotAngular12-theme: mat.define-light-theme(
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.all-component-themes($jotAngular12-theme);
+@import "./assets/styles/custom-styles.scss";
 @import "./assets/plugins/quill/quill.snow.css";
 @import "./assets/styles/colors-light.scss";
 @import "./assets/styles/sizing.scss";
 @import "./assets/styles/functions.scss";
 @import "./assets/styles/elements.scss";
-@import "./assets/styles/custom-styles.scss";
 
 html,
 body {

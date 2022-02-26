@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, forwardRef, ViewChild } from '@angular/core';
 import { EditorService } from 'src/app/_services/editor.service';
 import { HljsService } from 'src/app/_services/hljs.service';
 import { debounce } from 'lodash';
@@ -16,13 +16,11 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
       multi: true,
       useExisting: forwardRef(() => EditorComponent)
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
-export class EditorComponent extends FormField implements AfterViewInit, OnChanges {
+export class EditorComponent extends FormField implements AfterViewInit {
   editorInstance: any;
 
-  @Input() disabled: boolean;
   @ViewChild('editorContainer') editorContainer: ElementRef;
   @ViewChild('toolbar') toolbar: ElementRef;
   hljsInstance: any;
@@ -55,7 +53,6 @@ export class EditorComponent extends FormField implements AfterViewInit, OnChang
 
     this.editorInstance = this.editorService.initiate(containerRef.nativeElement, options);
     this.editorChange(this.editorInstance);
-    this.editorInstance.enable(!this.disabled);
   }
 
   editorChange(quill: any) {
@@ -82,11 +79,5 @@ export class EditorComponent extends FormField implements AfterViewInit, OnChang
 
   focusIn() {
     this.editorInstance.focus();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if(changes.disabled!==undefined || changes.disabled!==null) {
-      this.editorInstance?.enable(!changes.disabled.currentValue);
-    }
   }
 }
