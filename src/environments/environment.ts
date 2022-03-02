@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   peerUrls: [
-    // 'http://localhost:3000/gun',
+    'http://localhost:3000/gun',
     'http://a83hdrgadt8ub8hi0khdhau038.ingress.edgenet-1.ewr1.aksh.pw/gun'
   ],
   defaultStoreName: 'gunStore'
