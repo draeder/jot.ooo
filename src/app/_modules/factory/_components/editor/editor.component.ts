@@ -16,8 +16,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
       multi: true,
       useExisting: forwardRef(() => EditorComponent)
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class EditorComponent extends FormField implements AfterViewInit, OnChanges {
   editorInstance: any;
@@ -59,19 +58,21 @@ export class EditorComponent extends FormField implements AfterViewInit, OnChang
   }
 
   editorChange(quill: any) {
-    quill.on('selection-change', (delta: any, oldDelta: any, source: string) => {
+    quill.on('selection-change', () => {
       this.highlight();
     });
-    quill.on('text-change', (delta: any, oldDelta: any, source: string) => {
-      this.onChange(oldDelta?.ops)
+    quill.on('text-change', () => {
+      this.onChange(quill.getContents());
     });
   }
 
-  writeValue(editorContent: any): void {
+  writeValue(editorContent: any): void {    
       if(!editorContent) {
         this.editorInstance?.setContents([]);
         return;
       }
+
+      console.log(editorContent);
 
       if(typeof editorContent === 'object' || Array.isArray(editorContent)) {
         this.editorInstance?.setContents(editorContent);

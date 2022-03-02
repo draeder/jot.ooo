@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import * as GUN from 'gun/gun';
 import 'gun/sea';
 import { environment } from 'src/environments/environment';
+import { STORAGE_KEYS } from '../_models';
 
 export interface LoginRequest {
   username: string;
@@ -26,9 +27,13 @@ export class GunService {
   constructor(private userService: UserService) {
     this.gunOnReady().then(() => {
       // Login with Sear Pair
-      this.createSeaPair().then((seaPair) => {
-        this.loginWithSeaPair(seaPair);
-      });
+      this.getUserSeaPair().then((pair: IGunCryptoKeyPair) => {
+        this.loginWithSeaPair(pair);
+      }).catch(() => {
+        this.createNewSeaPair().then((pair: IGunCryptoKeyPair) => {
+          this.loginWithSeaPair(pair);
+        })
+      })
     });
   }
 
@@ -53,7 +58,7 @@ export class GunService {
    * Create a SEA pair
    * @returns Promise SEA pair
    */
-  public createSeaPair(): Promise<IGunCryptoKeyPair> {
+  public createNewSeaPair(): Promise<IGunCryptoKeyPair> {
     return new Promise((resolve, reject) => {
       try {
         this.sea.pair().then((pair: IGunCryptoKeyPair | any) => {
@@ -71,6 +76,7 @@ export class GunService {
    * @returns Promise
    */
   public loginWithSeaPair(pair: IGunCryptoKeyPair) {
+    sessionStorage.setItem(STORAGE_KEYS.USER_SEA_PAIR, JSON.stringify(pair));
     this.gun.user().auth(pair);
   }
 
@@ -86,7 +92,7 @@ export class GunService {
 
   public getUserSeaPair(): Promise<IGunCryptoKeyPair | any> {
     return new Promise((resolve, reject) => {
-      let pair = sessionStorage.getItem('pair');
+      let pair = sessionStorage.getItem(STORAGE_KEYS.USER_SEA_PAIR);
       if(pair) {
         pair = JSON.parse(pair);
         resolve(pair)
@@ -143,7 +149,6 @@ export class GunService {
           return;
         }
         this.decryptData(data, customSeaPair).then((decryptedData: any) => {
-          console.log('decrypted: ', data);
           resolve(decryptedData);
         }).catch(() => { reject(new Error(!data? 'No data to decrypt':  'Error while data decryption')) });
       });
@@ -173,7 +178,7 @@ export class GunService {
           }).catch((error) => { reject(error) });
         });
       }
-    })
+    });
   }
 
   /**
@@ -189,7 +194,7 @@ export class GunService {
           this.decrypt(encryptedData, customSeaPair).then((data) => {
             resolve(data);
           }).catch((error) => { reject(error) });
-      } else {
+      } else {       
         this.getUserSeaPair().then((pair) => {
           this.decrypt(encryptedData, pair).then((data) => {
             resolve(data);
@@ -206,7 +211,7 @@ export class GunService {
    * @returns decrypted data
    */
   private decrypt(encryptedData: any, pair: IGunCryptoKeyPair) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if(!encryptedData || !pair?.pub) { reject(null); return; }
       this.sea.verify(encryptedData, pair.pub).then((verifiedData: any) => {
         this.sea.decrypt(verifiedData, pair).then((decrypted: any) => {
@@ -219,6 +224,10 @@ export class GunService {
         console.error('Error decrypting data', error);
         reject(error);
       });
+
+      // const verified = await this.sea.verify(encryptedData, pair.pub);
+      // const decrypted = await this.sea.decrypt(verified, pair);
+      // resolve(decrypted);
     })
   }
 
@@ -229,15 +238,19 @@ export class GunService {
    * @returns encrypted data
    */
   private encrypt(data: any, pair: IGunCryptoKeyPair) {
-    return new Promise((resolve, reject) => {
-      this.sea.encrypt(data, pair).then((encrypted: any) => {
-        this.sea.sign(encrypted, pair).then((encryptedAndSignedData: any) => {
-          resolve(encryptedAndSignedData);
+    return new Promise( async (resolve, reject) => {
+      this.sea.encrypt(JSON.stringify(data), pair).then((encrypted: any) => {
+        this.sea.sign(encrypted, pair).then((signedData: any) => {
+          resolve(signedData);
         });
       }).catch((error: any) => { 
         console.error('Error encrypting data', error);
         reject(error);
       });
+
+      // const encrypted = await this.sea.encrypt(JSON.stringify(data), pair);
+      // const signed = await this.sea.sign(encrypted, pair);
+      // resolve(signed);
     })
   }
 }

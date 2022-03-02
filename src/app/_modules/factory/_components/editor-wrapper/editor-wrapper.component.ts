@@ -24,34 +24,35 @@ export class EditorWrapperComponent implements OnInit {
   editorContent: any;
   componentName = 'editorWrapperComponent';
   contentSaveStatus: LoadingStatus | null;
-  constructor(private gun: GunService, private user: UserService, private activatedRoute: ActivatedRoute) { }
+  loadingState: boolean;
+  constructor(private gun: GunService, private user: UserService) { }
 
   ngOnInit(): void {
+    this.initiateEditor();
     // Subscribe to user's auth state
     this.user.auth$
-      .subscribe((auth: any) => {
+      .subscribe((auth: any) => {        
         if (!!auth) {
-          // After user is logged in
-          console.log('Logged In, trying to fetch saved data');
+          this.loadingState = true;
           this.gun.getPrivateStoreData(environment.defaultStoreName, this.componentName)
             .then((data) => {
-              console.log('Data found', data);
+              this.loadingState = false;
+              this.updateContent(data.content, data.metadata);
             }).catch((err) => {
-              console.log('data not found', err);
+              this.loadingState = false;
+              console.log(err);
             });
         } else {
           if (this.editorForm) { this.editorForm.disable(); }
         }
       });
-    this.initiateEditor();
   }
 
   initiateEditor(initialData?: any) {
-    console.log('INITIATING EDITOR...', initialData);
     const { metadata, content } = initialData || {};
     this.editorForm = new FormGroup({
       metadata: new FormControl({ value: metadata || new EditorToolbar() }),
-      content: new FormControl({ value: content || '' }),
+      content: new FormControl({ value: content || {} }),
     });
 
     this.editorForm.valueChanges
@@ -60,7 +61,7 @@ export class EditorWrapperComponent implements OnInit {
         debounceTime(1000) // 1 second delay
       )
       .subscribe((value: any) => {
-        if (value && value.metadata && value.content) {
+        if (value && value.metadata && value.content) {          
           this.gun.createPrivateStore(environment.defaultStoreName, this.componentName, value).then(() => {
             this.contentSaveStatus = LoadingStatus.SUCCESS;
           }).catch(() => {
@@ -74,7 +75,7 @@ export class EditorWrapperComponent implements OnInit {
 
   updateContent(content: any, metadata?: EditorToolbar | null) {
     this.editorForm?.controls.content.setValue(content || null)
-
+    this.editorContent = content || null;
     if (metadata) {
       this.editorForm?.controls.metadata.setValue({
         private: metadata.private,
@@ -82,18 +83,4 @@ export class EditorWrapperComponent implements OnInit {
       })
     }
   }
-
-  // saveData() {
-  //   if (this.editorForm.value && this.editorForm.valid && !this.editorForm.pristine) {
-  //     this.contentSaveStatus = LoadingStatus.LOADING;
-  //     this.gun.createPrivateStore(environment.defaultStoreName, this.componentName, this.editorForm.value).then(() => {
-  //       this.contentSaveStatus = LoadingStatus.SUCCESS;
-  //     }).catch(() => {
-  //       this.contentSaveStatus = LoadingStatus.ERROR;
-  //     });
-  //   } else {
-  //     this.contentSaveStatus = null;
-  //     console.log('INVALID FORM');
-  //   }
-  // }
 }

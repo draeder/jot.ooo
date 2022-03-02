@@ -16,9 +16,7 @@ export class UserLoginMenuComponent {
   }
 
   login() {
-    this.gun.createSeaPair().then((seaPair) => {
-      this.gun.loginWithSeaPair(seaPair);
-    });
+
   }
 
   logout() {

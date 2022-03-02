@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 declare const Quill: any;
+const Clipboard = Quill.import('modules/clipboard');
 
 
 export interface IconConfig {

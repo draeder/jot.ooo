@@ -22,3 +22,7 @@ export const LANGUAGES = [
     'ini',
     'xml',
 ];
+
+export const STORAGE_KEYS = {
+    USER_SEA_PAIR: 'user_sea_pair',
+}
