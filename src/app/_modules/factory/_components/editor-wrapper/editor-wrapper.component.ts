@@ -5,8 +5,6 @@ import { UserService } from '@services/user.service';
 import { environment } from 'src/environments/environment';
 import { EditorToolbar } from '../card-wrapper/card-wrapper.component';
 import { debounceTime, tap } from 'rxjs/operators';
-import { ActivatedRoute } from '@angular/router';
-import { get } from 'lodash';
 
 export enum LoadingStatus {
   LOADING = 'loading',
@@ -34,13 +32,13 @@ export class EditorWrapperComponent implements OnInit {
       .subscribe((auth: any) => {        
         if (!!auth) {
           this.loadingState = true;
+          this.editorForm.enable();
           this.gun.getPrivateStoreData(environment.defaultStoreName, this.componentName)
             .then((data) => {
               this.loadingState = false;
               this.updateContent(data.content, data.metadata);
             }).catch((err) => {
               this.loadingState = false;
-              console.log(err);
             });
         } else {
           if (this.editorForm) { this.editorForm.disable(); }
@@ -81,6 +79,19 @@ export class EditorWrapperComponent implements OnInit {
         private: metadata.private,
         title: metadata.title
       })
+    }
+  }
+
+  getStatusText(contentSaveStatus: LoadingStatus | null) {
+    switch (contentSaveStatus) {
+      case LoadingStatus.LOADING:
+        return 'Saving...';
+      case LoadingStatus.SUCCESS:
+        return 'Saved';
+      case LoadingStatus.ERROR:
+        return 'Error while saving...';
+      default:
+        return '';
     }
   }
 }

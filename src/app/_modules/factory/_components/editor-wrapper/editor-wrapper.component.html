@@ -5,9 +5,9 @@
         </div>
 
         <div class="card-status-bar text-secondary">
-            <p class="xsmall" *ngIf="contentSaveStatus === 'loading'">Saving...</p>
-            <p class="xsmall" *ngIf="contentSaveStatus === 'success'">Saved</p>
-            <p class="xsmall" *ngIf="contentSaveStatus === 'error'">Error while saving</p>
+            <p class="xsmall">
+                {{getStatusText(contentSaveStatus)}}
+            </p>
         </div>
     </app-card-wrapper>
 </form>
